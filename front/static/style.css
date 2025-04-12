@@ -1,0 +1,302 @@
+body {
+    margin: 0;
+    overflow: auto;
+    font-family: Arial, sans-serif;
+    background: #0D1117;
+    color: white;
+}
+
+/* Add header spacing */
+#graph {
+    position: fixed;
+    top: 80px;
+    /* Space for header */
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 80px);
+    /* Account for header height */
+}
+
+.header {
+    background-color: #171E28;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Keep logo and buttons aligned */
+    position: relative;
+    height: 40px;
+    /* Fixed header height */
+    z-index: 1000;
+    /* Keep header above other elements */
+}
+
+/* Prevent logo/button overlap */
+.header-logo {
+    height: 60px;
+    position: relative;
+    z-index: 1001;
+    /* Keep logo above buttons */
+}
+
+/* General styles for the navigation container */
+.nav-buttons {
+    display: flex;
+    /* Use flexbox for layout */
+    gap: 100px;
+    /* Add space between buttons */
+    align-items: center;
+    /* Align buttons vertically */
+}
+
+/* Center the nav-buttons by overriding the header's justify-content */
+.header .nav-buttons {
+    position: absolute;
+    left: 50%;
+    /* Move the container to the horizontal center */
+    transform: translateX(-50%);
+    /* Adjust for exact centering */
+    white-space: nowrap;
+    /* Prevent wrapping of buttons */
+}
+
+/* Styles for each navigation link */
+.nav-buttons a {
+    text-decoration: none;
+    /* Remove default underline */
+    font-size: 30px;
+    /* Larger font size */
+    color: white;
+    /* White font color */
+    position: relative;
+    /* Needed for the underline effect */
+    transition: color 0.3s ease;
+    /* Smooth color transition */
+}
+
+/* Hover effect: Smooth underline appears */
+.nav-buttons a::after {
+    content: '';
+    /* Creates the underline */
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    /* Position below the text */
+    width: 100%;
+    height: 2px;
+    /* Thickness of the underline */
+    background-color: white;
+    /* Color of the underline */
+    transform: scaleX(0);
+    /* Initially hidden */
+    transform-origin: center;
+    transition: transform 0.3s ease;
+    /* Smooth transition */
+}
+
+/* Show the underline on hover */
+.nav-buttons a:hover::after {
+    transform: scaleX(1);
+    /* Fully visible underline */
+}
+
+/* Optional: Change text color slightly on hover for better interactivity */
+.nav-buttons a:hover {
+    color: #d4d4d4;
+    /* Slightly lighter white */
+}
+
+/* Refactor the stats container */
+#stats-container {
+    position: fixed;
+    left: 20px;
+    top: 80px;
+    width: 100%;
+    height: calc(100vh - 130px);
+    background: #171E28;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+/* Chart container styles */
+#chart-container {
+    flex: 1;
+    /* Take up most of the space */
+    padding-right: 40px;
+    /* Add some space between chart and table */
+    overflow: hidden;
+}
+
+/* Table container styles */
+#articles-table {
+    flex: 1;
+    /* Take up space on the right */
+    overflow-y: auto;
+    max-height: 100%;
+    overflow: hidden;
+    /* Hide the scrollbar */
+    max-height: 500px;
+    /* Optional: Set a max-height to control the table height */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #2F363D;
+    color: white;
+    border-radius: 8px;
+    margin-top: 20px;
+    table-layout: fixed;
+}
+
+
+#articles-table::-webkit-scrollbar {
+    display: none;
+}
+
+th,
+td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+
+th {
+    background: #0D1117;
+}
+
+tr:hover {
+    background: #3A444D;
+}
+
+/* Tooltip positioning */
+.tooltip {
+    background: #171E28;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    position: absolute;
+    font-family: sans-serif;
+    z-index: 1002;
+    /* Above all other elements */
+    max-width: 400px;
+    /* Increase max width */
+    font-size: 18px;
+    /* Increase font size */
+    padding: 15px;
+    /* Increase padding for more space inside the tooltip */
+    line-height: 1.5;
+    /* Make text easier to read */
+    border: 2px solid #0D1117;
+    /* Set border color here */
+}
+
+/* Node adjustments for spacing */
+.node {
+    fill: #4CAF50;
+    stroke: #fff;
+    stroke-width: 2px;
+    cursor: pointer;
+    transition: r 0.2s;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+/* Scrollable table when content overflows */
+#articles-table {
+    max-height: 90%;
+    overflow-y: auto;
+}
+
+/* Optional: Add some padding to stats container */
+#stats-container {
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.legend {
+    position: fixed;
+    top: 100px;
+    /* Below header */
+    right: 20px;
+    /* Move to right side */
+    background: #171E28;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    color: white;
+    z-index: 999;
+    /* Below header but above graph */
+    max-height: calc(100vh - 140px);
+    /* Prevent bottom overflow */
+    overflow-y: auto;
+    /* Add scroll if needed */
+}
+
+/* General styles for about section */
+.about-text {
+    background-color: #1e252d;
+    padding: 10px;
+    padding-left: 100px;
+    padding-right: 100px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: white;
+    margin-bottom: 20px;
+    /* Add space between containers */
+}
+
+/* Dynamic rainbow text (initial state) */
+.dynamic-rainbow-text {
+    font-size: 1.5rem;
+    color: transparent;
+    display: inline-block;
+    background: linear-gradient(45deg, #0091ff, #8600ff, #ff00cc);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.about-text p {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.about-text ul {
+    list-style-type: none;
+    /* Removes default list style */
+    padding-left: 0;
+}
+
+.about-text li {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.about-text li::before {
+    content: "•";
+    /* Adds a custom bullet point */
+    /* Green bullet */
+    margin-right: 10px;
+    /* Space between bullet and text */
+    font-size: 1.5em;
+    /* Bigger bullet */
+}
