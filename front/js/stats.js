@@ -170,9 +170,9 @@ export class StatsVisualizer {
 
         // Table header
         const header = table.append("thead").append("tr");
-        header.append("th").text("Title").style("text-align", "left");
-        header.append("th").text("Authors").style("text-align", "left");
-        header.append("th").text("DOI").style("text-align", "left");
+        header.append("th").text("Title").style("text-align", "center");
+        header.append("th").text("Authors").style("text-align", "center");
+        header.append("th").text("DOI").style("text-align", "center");
 
         // Table body
         const tbody = table.append("tbody");
