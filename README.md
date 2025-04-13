@@ -52,7 +52,18 @@ Frontend logic and dynamic UI interactions.
 Force-directed graph rendering and interactive node-edge visualizations.  
 
 ## Deployment  
-In progress  
+
+First of all clone out repo:
+```bash
+git clone https://github.com/your-username/https://github.com/Data-Wrangling-and-Visualisation/CitationFlow.AI
+cd CitationFlow.AI
+```
+
+Now just run doker-compose
+```bash
+docker-compose up --build
+```
+And access site on (localhost:8080)[localhost:8080]
 
 ## Roadmap  
 - 🟢 **Week 1**:
@@ -61,19 +72,19 @@ In progress
   - 🟢 API exploration
 - 🟢 **Week 2**:
   - 🟢 Initial data extraction
-- 🟡 **Week 3**:
+- 🟢 **Week 3**:
   - 🟢 Data cleaning and analysis 
-  - 🟡 Database schema design
-- 🟡 **Weeks 4-5**:
-  - 🟡 Site design
-  - 🟡 Graph visualization
-- 🟠 **Weeks 6-7**:
-  - 🟠 Interactive features
-  - 🟠 UI refinement
-- 🟠 **Weeks 8-9**:
-  - 🟠 Stress testing and optimization
-  - 🟠 UI refinement
-  - 🟠 Documentation
+  - 🟢 Database schema design
+- 🟢 **Weeks 4-5**:
+  - 🟢 Site design
+  - 🟢 Graph visualization
+- 🟢 **Weeks 6-7**:
+  - 🟢 Interactive features
+  - 🟡 UI refinement
+- 🟡 **Weeks 8-9**:
+  - 🟡 Stress testing and optimization
+  - 🟡 UI refinement
+  - 🟡 Documentation
 - 🟠 **Week 10**:
   - 🟠 Final presentation
 - 🟠 **Week 11**:
