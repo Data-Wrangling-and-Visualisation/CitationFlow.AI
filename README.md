@@ -55,7 +55,7 @@ Force-directed graph rendering and interactive node-edge visualizations.
 
 First of all clone out repo:
 ```bash
-git clone https://github.com/your-username/https://github.com/Data-Wrangling-and-Visualisation/CitationFlow.AI
+git clone https://github.com/Data-Wrangling-and-Visualisation/CitationFlow.AI
 cd CitationFlow.AI
 ```
 
