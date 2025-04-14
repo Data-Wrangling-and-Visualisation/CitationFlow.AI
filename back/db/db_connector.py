@@ -2,12 +2,13 @@ import asyncpg
 import os
 
 DB_CONFIG = {
-    "user": os.getenv("DB_USER", "postgres"),
-    "password": os.getenv("DB_PASSWORD", "password"),
-    "database": os.getenv("DB_NAME", "cf_test"),
-    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "myuser"),
+    "password": os.getenv("DB_PASSWORD", "mypassword"),
+    "database": os.getenv("DB_NAME", "mydatabase"),
+    "host": os.getenv("DB_HOST", "db"),
     "port": os.getenv("DB_PORT", "5432"),
 }
+
 
 async def get_connection():
     """Establish a connection to the PostgreSQL database."""
