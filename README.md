@@ -1,112 +1,105 @@
-
 <div align="center">
-  
-  ![logo](logo.svg)
-  
-  Graph-based representation of AI research field  
+  <img src="logo.svg" alt="CitationFlow.AI Logo" width="200"/>
+
+  ### Graph-based Representation of AI Research Field  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+  [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
+  [![D3.js 7.8+](https://img.shields.io/badge/D3.js-7.8%2B-orange)](https://d3js.org/)
 </div>
 
-## Index  
-- [Project Overview](#project-overview)
-- [Used Technologies](#used-technologies)
-- [Deployment](#deployment)
-- [Roadmap](#roadmap)  
-- [Future Enhancements](#future-enhancements)
-- [Acknowledgements](#acknowledgements)
-- [Authors](#authors)  
-- [License](#license)  
+## 📌 Table of Contents  
+- [🚀 Project Overview](#-project-overview)  
+- [🛠️ Used Technologies](#%EF%B8%8F-used-technologies)  
+- [⚡ Deployment](#-deployment)  
+- [🗺️ Roadmap](#%EF%B8%8F-roadmap)  
+- [🔮 Future Enhancements](#-future-enhancements)  
+- [🙏 Acknowledgements](#-acknowledgements)  
+- [👥 Authors](#-authors)  
+- [📜 License](#-license)  
 
-## Project Overview  
-**CitationFlow.AI** is an interactive visualization tool designed to explore relationships within AI research literature. It represents articles as nodes and their citations as edges in a graph, enabling users to navigate trends, topics, and connections in the AI field.  
+---
 
-**Key Features**:  
-- **Graph Representation**: Visualize articles and their citation networks.  
-- **Topic Clustering**: Automatically group articles by research themes.  
-- **Popularity Indicators**: Node size/color reflects citation count and topic relevance.  
-- **Interactive Interface**: Filter, search, and explore the graph dynamically.  
+## 🚀 Project Overview  
+**CitationFlow.AI** is an interactive visualization tool that maps AI research literature as a dynamic citation network, helping users uncover trends, connections, and emerging topics.  
 
-**Target Users**: Researchers, AI engineers, and enthusiasts seeking efficient knowledge discovery in AI literature.  
+### 🔑 Key Features  
+| Feature | Description |  
+|---------|-------------|  
+| **Graph Visualization** | Articles as nodes, citations as edges in an interactive force-directed graph. |  
+| **Popularity Metrics** | Node size/color reflects citation count and influence. |  
+| **Dynamic Filtering** | Search, filter, and drill down into specific research areas. |  
 
-**Data Source**: Articles and metadata retrieved via the ScienceDirect API.  
+**Target Audience**: Researchers, AI practitioners, and students exploring AI literature.  
 
-## Used Technologies  
+**Data Source**: [ScienceDirect API](https://www.elsevier.com/solutions/sciencedirect)  
 
-### **Database & Data Processing**  
-![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)  
-Core language for data scraping, preprocessing, and backend logic.  
+---
 
-![Pandas](https://img.shields.io/badge/Pandas-2.0%2B-150458?style=for-the-badge&logo=pandas&logoColor=white)  
-Data cleaning, transformation, and analysis of article metadata.  
+## 🛠️ Used Technologies  
 
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)  
-Structured storage of article relationships and citation networks.  
+### 🗃️ Database & Backend  
+| Technology | Role |  
+|------------|------|  
+| ![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python) | Data processing, API integration, and backend logic. |  
+| ![Pandas](https://img.shields.io/badge/Pandas-2.0%2B-150458?logo=pandas) | Data cleaning and transformation. |  
+| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?logo=postgresql) | Scalable storage for citation networks. |  
 
-![Matplotlib](https://img.shields.io/badge/Matplotlib-3.7%2B-11557C?style=for-the-badge&logo=matplotlib&logoColor=white)  
-Preliminary data exploration and static trend analysis plots.  
+### 🎨 Frontend & Visualization  
+| Technology | Role |  
+|------------|------|  
+| ![D3.js](https://img.shields.io/badge/D3.js-7.8%2B-F9A03C?logo=d3.js) | Interactive graph rendering and force simulations. |  
+| ![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?logo=javascript) | Dynamic UI and event handling. |  
 
-### **Visualization & Frontend**  
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)  
-Frontend logic and dynamic UI interactions.  
+---
 
-![D3.js](https://img.shields.io/badge/D3.js-7.8%2B-F9A03C?style=for-the-badge&logo=d3.js&logoColor=white)  
-Force-directed graph rendering and interactive node-edge visualizations.  
+## ⚡ Deployment  
 
-## Deployment  
-
-First of all clone out repo:
+### Quick Start with Docker  
 ```bash
 git clone https://github.com/Data-Wrangling-and-Visualisation/CitationFlow.AI
 cd CitationFlow.AI
-```
-
-Now just run doker-compose
-```bash
 docker-compose up --build
 ```
-And access site on (localhost:8080)[localhost:8080]
+Access the app at: [http://localhost:8080](http://localhost:8080)  
 
-## Roadmap  
-- 🟢 **Week 1**:
-  - 🟢 Project setup
-  - 🟢 Choice of technologies
-  - 🟢 API exploration
-- 🟢 **Week 2**:
-  - 🟢 Initial data extraction
-- 🟢 **Week 3**:
-  - 🟢 Data cleaning and analysis 
-  - 🟢 Database schema design
-- 🟢 **Weeks 4-5**:
-  - 🟢 Site design
-  - 🟢 Graph visualization
-- 🟢 **Weeks 6-7**:
-  - 🟢 Interactive features
-  - 🟡 UI refinement
-- 🟡 **Weeks 8-9**:
-  - 🟡 Stress testing and optimization
-  - 🟡 UI refinement
-  - 🟡 Documentation
-- 🟠 **Week 10**:
-  - 🟠 Final presentation
-- 🟠 **Week 11**:
-  - 🟠 Celebration at 108 Bar
+---
 
-## Future Enhancements  
-- **Timeline**: Track research trends over time  
-- **Custom Topics**: Build graphs based on user-defined criteria  
+## 🗺️ Roadmap  
+| Phase | Status | Tasks |  
+|-------|--------|-------|  
+| **Setup & API Integration** | ✅ | Project scaffolding, ScienceDirect API exploration |  
+| **Data Pipeline** | ✅ | Data extraction, cleaning, and DB schema design |  
+| **Visualization** | ✅ | D3.js graph implementation |  
+| **UI/UX Refinement** | 🟡 | Filtering, search, and responsive design |  
+| **Optimization** | 🟠 | Performance tuning and stress testing |  
 
-## Acknowledgements  
-- Data sourced from the [ScienceDirect API](https://www.elsevier.com/solutions/sciencedirect)  
+---
 
-## Authors  
-- **Marsel Berheev** m.berheeev@innopolis.university  
-  - Team Lead and Frontend Developer  
-- **Nikita Stepankov** n.stepankov@innopolis.university  
-  - Data Collection and Analysis  
-- **Makar Egorov** m.egorov@innopolis.university  
-  - Database Administration and Data Analysis  
+## 🔮 Future Enhancements  
+- **Temporal Analysis**: Animate research trends over time.  
+- **User Customization**: Save/export subgraphs and topic preferences.  
+- **Collaboration Tools**: Shared annotations and graph bookmarks.  
 
-## License  
-This project is licensed under the **MIT License**.  
-For details, see [LICENSE](LICENSE).  
+---
 
-Innopolis University, Russia  
+## 🙏 Acknowledgements  
+- Data provided by [ScienceDirect/Elsevier](https://www.elsevier.com/solutions/sciencedirect).  
+- Built with support from **Innopolis University**.  
+
+---
+
+## 👥 Authors  
+| Role | Name | Contact |  
+|------|------|---------|  
+| **Team Lead** | Marsel Berheev | m.berheeev@innopolis.university |  
+| **Data Engineer** | Nikita Stepankov | n.stepankov@innopolis.university |  
+| **DB Architect** | Makar Egorov | m.egorov@innopolis.university |  
+
+---
+
+## 📜 License  
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.  
+
+---
+
+### ✨ *Unlock the hidden connections in AI research with CitationFlow.AI!*  
