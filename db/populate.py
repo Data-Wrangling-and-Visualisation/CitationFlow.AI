@@ -2,6 +2,17 @@ import json
 import psycopg2
 from datetime import datetime
 
+import os
+
+conn = psycopg2.connect(
+    dbname=os.getenv("POSTGRES_DB"),
+    user=os.getenv("POSTGRES_USER"),
+    password=os.getenv("POSTGRES_PASSWORD"),
+    host=os.getenv("POSTGRES_HOST", "localhost"),
+    port=os.getenv("POSTGRES_PORT", "5432")
+)
+
+
 def tsv_to_json(tsv_filename, json_filename):
     """Converts a TSV file of citations into JSON format."""
     citations = {}
@@ -76,19 +87,6 @@ def main():
     # Load data from JSON files
     articles_data = load_json('raw_data.json')
     citations_data = load_json('references.json')
-
-    # Connect to PostgreSQL database
-    try:
-        conn = psycopg2.connect(
-            dbname="cf_test",
-            user="postgres",
-            password="password",
-            host="localhost",
-            port="5432"
-        )
-    except psycopg2.Error as e:
-        print(f"Database connection error: {e}")
-        return
 
     # Create table
     create_tables(conn)
