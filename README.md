@@ -55,6 +55,16 @@
 ## ⚡ Deployment  
 
 ### Quick Start with Docker  
+
+First of all define .env file
+```
+DB_USER=postgres
+DB_PASSWORD=password
+DB_NAME=cf_test
+DB_HOST=db
+DB_PORT=5432
+```
+
 ```bash
 git clone https://github.com/Data-Wrangling-and-Visualisation/CitationFlow.AI
 cd CitationFlow.AI
