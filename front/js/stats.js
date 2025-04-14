@@ -35,7 +35,7 @@ class Nodes {
 
 export class TopicsPlot {
     constructor() {
-        this.gradient = d3.interpolateCool; // or d3.interpolateRainbow, interpolateViridis, etc.
+        this.gradient = d3.interpolateRgb("blue", "purple"); // or d3.interpolateRainbow, interpolateViridis, etc.
 
         this.nodesManager = new Nodes();  // Use the Nodes class
         this.initContainer();
@@ -48,7 +48,7 @@ export class TopicsPlot {
             node.topics.forEach(term => termSet.add(term));
         });
         return Array.from(termSet).sort(); // optionally sort for consistency
-    }    
+    }
 
     generateTermColors(terms) {
         const scale = d3.scaleLinear()
@@ -71,15 +71,15 @@ export class TopicsPlot {
     async loadAndRender() {
         await this.nodesManager.loadNodes();
         this.nodes = this.nodesManager.getAllNodes();
-    
+
         // Dynamically extract terms from nodes
         this.terms = this.extractAllTerms(this.nodes);
         this.termColors = this.generateTermColors(this.terms);
-    
+
         const processedData = this.processNodes(this.nodes);
         this.createChart(processedData);
     }
-    
+
 
     processNodes(nodes) {
         const termCounts = new Map();
@@ -284,9 +284,13 @@ export class DatePlot {
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Use pastel colors from d3.schemePastel1
-        const colorScale = d3.scaleOrdinal(d3.schemePastel1)
-            .domain(data.map(d => d.year)); // Assign a unique color to each year
+        // Create a linear scale to map years to the 0–1 range
+        const yearExtent = d3.extent(data, d => d.year);
+        const colorPosition = d3.scaleLinear()
+            .domain(yearExtent)
+            .range([0, 1]);
+
+        const colorScale = d => d3.interpolateRgb("blue", "purple")(colorPosition(d.year));
 
         const x = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.count)])
@@ -319,7 +323,7 @@ export class DatePlot {
             .attr("y", d => y(d.year))
             .attr("width", 0)
             .attr("height", y.bandwidth())
-            .attr("fill", d => colorScale(d.year))
+            .attr("fill", d => colorScale(d))
             .on("click", (event, d) => this.highlightBarAndShowTable(d)) // <-- Moved here
             .transition()
             .duration(3000)
@@ -492,9 +496,17 @@ export class AuthorBubbles {
         const nodes = pack(root).leaves();
 
         // Color scale with better contrast
-        const color = d3.scaleOrdinal()
-            .domain(this.authorData.map(d => d.name))
-            .range(d3.schemeTableau10);
+        // Get the min and max value for proper scaling
+        const valueExtent = d3.extent(this.authorData, d => d.value);
+
+        // Linear scale to normalize value for color interpolation
+        const colorPosition = d3.scaleLinear()
+            .domain(valueExtent)
+            .range([0, 1]);
+
+        // RGB color interpolator from light to dark (feel free to change)
+        const colorInterpolator = d3.interpolateRgb("blue", "purple");
+
 
         // Node groups with optimized rendering
         const nodeGroups = svg.selectAll(".node")
@@ -507,7 +519,7 @@ export class AuthorBubbles {
         nodeGroups.append("circle")
             .attr("class", "bubble")
             .attr("r", d => d.r)
-            .style("fill", d => color(d.data.name))
+            .style("fill", d => colorInterpolator(colorPosition(d.data.value)))
             .style("stroke", "rgba(255, 255, 255, 0.8)")
             .style("stroke-width", 1.5)
             .style("cursor", "pointer")
