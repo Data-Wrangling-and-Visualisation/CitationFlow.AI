@@ -1,14 +1,17 @@
 import json
 import psycopg2
 from datetime import datetime
+import dotenv
 
 import os
+
+dotenv.load_dotenv()
 
 conn = psycopg2.connect(
     dbname=os.getenv("POSTGRES_DB"),
     user=os.getenv("POSTGRES_USER"),
     password=os.getenv("POSTGRES_PASSWORD"),
-    host=os.getenv("POSTGRES_HOST", "db"),  # Use 'db' as the hostname
+    host=os.getenv("POSTGRES_HOST", "localhost"),
     port=os.getenv("POSTGRES_PORT", "5432")
 )
 
