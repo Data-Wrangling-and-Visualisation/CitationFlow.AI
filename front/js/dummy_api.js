@@ -3,7 +3,7 @@ function randomDOI(i) {
 }
 
 function randomTerms() {
-  const terms = ['AI', 'ML', 'Bioinformatics', 'NLP', 'Vision', 'Data Mining'];
+  const terms = ['AI', 'ML', 'Bioinformatics', 'NLP', 'Vision', 'Data Mining', "Aboba"];
   return [
     terms[Math.floor(Math.random() * terms.length)],
     terms[Math.floor(Math.random() * terms.length)]

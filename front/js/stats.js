@@ -35,18 +35,32 @@ class Nodes {
 
 export class TopicsPlot {
     constructor() {
-        this.termColors = new Map([
-            ['AI', '#FF6B6B'],
-            ['ML', '#4ECDC4'],
-            ['Bioinformatics', '#45B7D1'],
-            ['NLP', '#96CEB4'],
-            ['Vision', '#FFEEAD'],
-            ['Data Mining', '#D4A5A5']
-        ]);
+        this.gradient = d3.interpolateCool; // or d3.interpolateRainbow, interpolateViridis, etc.
 
         this.nodesManager = new Nodes();  // Use the Nodes class
         this.initContainer();
         this.loadAndRender();
+    }
+
+    extractAllTerms(nodes) {
+        const termSet = new Set();
+        nodes.forEach(node => {
+            node.topics.forEach(term => termSet.add(term));
+        });
+        return Array.from(termSet).sort(); // optionally sort for consistency
+    }    
+
+    generateTermColors(terms) {
+        const scale = d3.scaleLinear()
+            .domain([0, terms.length - 1])
+            .range([0, 1]);
+
+        const colorMap = new Map();
+        terms.forEach((term, i) => {
+            colorMap.set(term, this.gradient(scale(i)));
+        });
+
+        return colorMap;
     }
 
     initContainer() {
@@ -57,10 +71,15 @@ export class TopicsPlot {
     async loadAndRender() {
         await this.nodesManager.loadNodes();
         this.nodes = this.nodesManager.getAllNodes();
-
+    
+        // Dynamically extract terms from nodes
+        this.terms = this.extractAllTerms(this.nodes);
+        this.termColors = this.generateTermColors(this.terms);
+    
         const processedData = this.processNodes(this.nodes);
         this.createChart(processedData);
     }
+    
 
     processNodes(nodes) {
         const termCounts = new Map();
