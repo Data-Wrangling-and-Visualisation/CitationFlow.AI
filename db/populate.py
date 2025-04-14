@@ -95,7 +95,6 @@ def main():
 
     # Load articles
     for doi, data in articles_data.items():
-        print(f"Inserting article {doi}")
         citations = citations_data.get(doi, [])
         insert_article(conn, doi, data, citations)
 
