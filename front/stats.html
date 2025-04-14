@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CitationFlow</title>
+    <link rel="stylesheet" href="static/style.css" />
+    <link rel="icon" href="static/ico.svg" type="image/x-icon" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <a href="./about.html">
+            <img src="static/ico.svg" alt="Logo" class="header-logo" />
+        </a>
+        <div class="nav-buttons">
+            <a href="./graph.html">Graph</a>
+            <a href="./stats.html">Stats</a>
+            <a href="./about.html">About</a>
+        </div>
+    </header>
+
+    <div class="scroll-wrapper">
+        <section class="snap-section">
+            <div id="stats-container">
+                <div id="chart-container"></div>
+                <div id="articles-table"></div>
+            </div>
+        </section>
+
+        <section class="snap-section">
+            <div id="stats-container">
+                <div id="year-bar"></div>
+                <div id="year-table"></div>
+            </div>
+        </section>
+
+        <section class="snap-section">
+            <div id="stats-container">
+                <div id="author-bubbles"></div>
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="js/stats.js"></script>
+</body>
+
+</html>
