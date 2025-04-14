@@ -1,4 +1,4 @@
-import { getNodes, getNodeInfo, getNodeRefs } from './api.js';
+import { getNodes, getNodeInfo, getNodeRefs } from './dummy_api.js';
 
 export class GraphVisualizer {
     constructor() {

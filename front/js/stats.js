@@ -1,4 +1,4 @@
-import { getNodes, getNodeInfo } from './api.js';
+import { getNodes, getNodeInfo } from './dummy_api.js';
 
 class Nodes {
     constructor() {
