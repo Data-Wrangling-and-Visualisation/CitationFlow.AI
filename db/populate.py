@@ -93,11 +93,16 @@ def main():
     # Create table
     create_tables(conn)
 
+    i = 0
+
     # Load articles
     for doi, data in articles_data.items():
         print(f"Inserting article {doi}")
         citations = citations_data.get(doi, [])
         insert_article(conn, doi, data, citations)
+        if i > 100:
+            break
+        i += 1
 
     conn.close()
     print("Data successfully loaded into the database.")

@@ -2,12 +2,13 @@ import asyncpg
 import os
 
 DB_CONFIG = {
-    "user": os.getenv("DB_USER", "postgres"),
-    "password": os.getenv("DB_PASSWORD", "password"),
-    "database": os.getenv("DB_NAME", "cf_test"),
-    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "myuser"),
+    "password": os.getenv("DB_PASSWORD", "mypassword"),
+    "database": os.getenv("DB_NAME", "mydatabase"),
+    "host": os.getenv("DB_HOST", "db"),
     "port": os.getenv("DB_PORT", "5432"),
 }
+
 
 async def get_connection():
     """Establish a connection to the PostgreSQL database."""
@@ -23,9 +24,9 @@ async def get_all_articles():
     return [{
         "doi": r["doi"],
         "title": r["title"],
-        "publish_date": r["publish_date"].isoformat() if r["publish_date"] else None,
         "url": r["url"],
-        "authors": r["authors"]
+        "authors": r["authors"],
+        "topics": []
     } for r in rows]
 
 async def get_article_by_doi(doi: str):
@@ -38,13 +39,22 @@ async def get_article_by_doi(doi: str):
         await conn.close()
         return None
     
+    # id: node.doi,
+    # title: details.title,
+    # authors: details.authors,
+    # topics: details.topics,
+    # url: details.url,
+    # refs: details.refs,
+    # date: details.date
+    
     result = {
         "doi": article["doi"],
         "title": article["title"],
-        "publish_date": article["publish_date"].isoformat() if article["publish_date"] else None,
-        "url": article["url"],
         "authors": article["authors"],
-        "citations": article["citations"],  # Handle citations as well
+        "topics": [],
+        "url": article["url"],
+        "refs": article["citations"],
+        "date": article["publish_date"].isoformat() if article["publish_date"] else None      
     }
 
     await conn.close()
