@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CitationFlow</title>
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="icon" href="static/ico.svg" type="image/x-icon">
+    <link rel="stylesheet" href="static/style.css" />
+    <link rel="icon" href="static/ico.svg" type="image/x-icon" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
     <header class="header">
         <a href="./about.html">
-            <img src="static/ico.svg" alt="Logo" class="header-logo">
+            <img src="static/ico.svg" alt="Logo" class="header-logo" />
         </a>
         <div class="nav-buttons">
             <a href="./graph.html">Graph</a>
@@ -20,13 +22,23 @@
         </div>
     </header>
 
-    <div id="stats-container" style="display: flex; justify-content: space-between;">
-        <div id="chart-container" style="flex: 1; padding-right: 20px;"></div>
-        <div id="articles-table" style="flex: 1; overflow-y: auto;"></div>
+    <div class="scroll-wrapper">
+        <section class="snap-section">
+            <div id="stats-container">
+                <div id="chart-container"></div>
+                <div id="articles-table"></div>
+            </div>
+        </section>
+
+        <section class="snap-section">
+            <div id="stats-container">
+                <div id="year-bar"></div>
+                <div id="year-table"></div>
+            </div>
+        </section>
     </div>
 
     <script type="module" src="js/stats.js"></script>
-
 </body>
 
 </html>
