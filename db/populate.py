@@ -8,11 +8,11 @@ import os
 dotenv.load_dotenv()
 
 conn = psycopg2.connect(
-    dbname=os.getenv("POSTGRES_DB"),
-    user=os.getenv("POSTGRES_USER"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    host=os.getenv("POSTGRES_HOST", "localhost"),
-    port=os.getenv("POSTGRES_PORT", "5432")
+    dbname=os.getenv("DB_NAME", "cf_test"),
+    user=os.getenv("DB_USER", "postgres"),
+    password=os.getenv("DB_PASSWORD", "password"),
+    host=os.getenv("DB_HOST", "localhost"),
+    port=os.getenv("DB_PORT", "5432")
 )
 
 def tsv_to_json(tsv_filename, json_filename):
@@ -93,16 +93,11 @@ def main():
     # Create table
     create_tables(conn)
 
-    i = 0
-
     # Load articles
     for doi, data in articles_data.items():
         print(f"Inserting article {doi}")
         citations = citations_data.get(doi, [])
         insert_article(conn, doi, data, citations)
-        if i > 100:
-            break
-        i += 1
 
     conn.close()
     print("Data successfully loaded into the database.")

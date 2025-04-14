@@ -1,3 +1,2 @@
-psycopg2-binary
-pandas
-dotenv
+psycopg2
+python-dotenv

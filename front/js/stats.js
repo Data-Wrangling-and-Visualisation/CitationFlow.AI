@@ -1,55 +1,88 @@
-import { getNodes, getNodeInfo } from './api.js';
+import { getNodes } from './api.js';
 
 class Nodes {
     constructor() {
         this.nodes = [];
     }
 
+    // Asynchronously load and populate nodes
     async loadNodes() {
         try {
-            const basicNodes = await getNodes();
-
-            const nodeDetailsPromises = basicNodes.map(async (node) => {
-                const details = await getNodeInfo(node.doi);
-                return {
-                    id: node.doi,
-                    title: details.title,
-                    authors: details.authors,
-                    topics: details.topics,
-                    url: details.url,
-                    refs: details.refs,
-                    date: details.date
-                };
-            });
-
-            this.nodes = await Promise.all(nodeDetailsPromises);
+            const basicNodes = await this.fetchNodesData();
+            const nodeDetails = await this.mapNodeDetails(basicNodes);
+            this.nodes = nodeDetails;
         } catch (error) {
             console.error("Error loading nodes:", error);
         }
     }
 
+    // Fetch basic node data (could be extended or mocked for testing)
+    async fetchNodesData() {
+        return await getNodes();
+    }
+
+    // Map basic node data to full node details
+    async mapNodeDetails(basicNodes) {
+        const nodeDetailsPromises = basicNodes.map(async (node) => {
+            return {
+                id: node.doi,
+                title: node.title,
+                authors: node.authors,
+                topics: node.topics,
+                url: node.url,
+                refs: node.refs,
+                date: node.date
+            };
+        });
+
+        return await Promise.all(nodeDetailsPromises);
+    }
+
+    // Get all nodes in the storage
     getAllNodes() {
         return this.nodes;
     }
+
+    // Get a specific node by its id
+    getNodeById(id) {
+        return this.nodes.find(node => node.id === id);
+    }
+
+    // Optionally, add or update a node in the storage
+    addNode(node) {
+        const existingNodeIndex = this.nodes.findIndex(existingNode => existingNode.id === node.id);
+        if (existingNodeIndex === -1) {
+            this.nodes.push(node); // Add new node if not already present
+        } else {
+            this.nodes[existingNodeIndex] = node; // Update the node if it already exists
+        }
+    }
+
+    // Remove a node by its id
+    removeNode(id) {
+        this.nodes = this.nodes.filter(node => node.id !== id);
+    }
 }
+
 
 export class TopicsPlot {
     constructor() {
-        this.gradient = d3.interpolateRgb("blue", "purple"); // or d3.interpolateRainbow, interpolateViridis, etc.
-
+        this.gradient = d3.interpolateRgb("blue", "purple"); // Color gradient
         this.nodesManager = new Nodes();  // Use the Nodes class
         this.initContainer();
         this.loadAndRender();
     }
 
+    // Extract all unique topics from the nodes
     extractAllTerms(nodes) {
         const termSet = new Set();
         nodes.forEach(node => {
             node.topics.forEach(term => termSet.add(term));
         });
-        return Array.from(termSet).sort(); // optionally sort for consistency
+        return Array.from(termSet).sort(); // Sort terms for consistency
     }
 
+    // Generate color mapping for each term
     generateTermColors(terms) {
         const scale = d3.scaleLinear()
             .domain([0, terms.length - 1])
@@ -63,24 +96,27 @@ export class TopicsPlot {
         return colorMap;
     }
 
+    // Initialize the container for rendering
     initContainer() {
         this.container = d3.select("#chart-container");
-        this.container.html('');
+        this.container.html(''); // Clear any existing content
     }
 
+    // Load nodes and render the chart
     async loadAndRender() {
-        await this.nodesManager.loadNodes();
-        this.nodes = this.nodesManager.getAllNodes();
+        await this.nodesManager.loadNodes();  // Load nodes data
+        this.nodes = this.nodesManager.getAllNodes();  // Retrieve the loaded nodes
 
-        // Dynamically extract terms from nodes
+        // Dynamically extract terms and generate colors for the topics
         this.terms = this.extractAllTerms(this.nodes);
         this.termColors = this.generateTermColors(this.terms);
 
+        // Process the nodes data
         const processedData = this.processNodes(this.nodes);
         this.createChart(processedData);
     }
 
-
+    // Process the nodes to count occurrences of each term
     processNodes(nodes) {
         const termCounts = new Map();
         let totalTerms = 0;
@@ -101,6 +137,7 @@ export class TopicsPlot {
         })).filter(d => d.count > 0);
     }
 
+    // Create the pie chart
     createChart(data) {
         const width = 500;
         const height = 500;
@@ -153,6 +190,7 @@ export class TopicsPlot {
             .on("click", (event, d) => this.highlightSlice(d));
     }
 
+    // Highlight a selected pie slice
     highlightSlice(selectedData) {
         const allPaths = this.container.selectAll(".arc path");
 
@@ -173,10 +211,11 @@ export class TopicsPlot {
         }
     }
 
+    // Populate the table with articles for the selected term
     populateTable(term) {
         const articles = this.nodes.filter(node => node.topics.includes(term));
         const tableContainer = d3.select("#articles-table");
-        tableContainer.html('');
+        tableContainer.html('');  // Clear existing table content
 
         const table = tableContainer.append("table")
             .style("width", "100%")
@@ -198,10 +237,12 @@ export class TopicsPlot {
         });
     }
 
+    // Clear the articles table
     clearTable() {
         d3.select("#articles-table").html('');
     }
 
+    // Show the tooltip with topic details
     showTooltip(event, data) {
         this.hideTooltip();
 
@@ -221,6 +262,7 @@ export class TopicsPlot {
             .style("opacity", 1);
     }
 
+    // Hide the tooltip
     hideTooltip() {
         d3.selectAll(".tooltip")
             .transition()
@@ -390,10 +432,11 @@ export class DatePlot {
     }
 }
 
+
 export class AuthorBubbles {
     constructor() {
+        this.nodesManager = new Nodes(); // Use the Nodes class
         this.containerId = "author-bubbles";
-        this.nodes = [];
         this.authorData = [];
         this.initContainer();
         this.loadNodesAndRender();
@@ -417,7 +460,7 @@ export class AuthorBubbles {
 
     async loadNodesAndRender() {
         try {
-            await this.loadNodes();
+            await this.nodesManager.loadNodes();
             this.processAuthors();
 
             if (this.authorData.length === 0) {
@@ -432,33 +475,10 @@ export class AuthorBubbles {
         }
     }
 
-    async loadNodes() {
-        try {
-            const basicNodes = await getNodes();
-            this.nodes = await Promise.all(
-                basicNodes.map(async node => {
-                    const details = await getNodeInfo(node.doi);
-                    return {
-                        id: node.doi,
-                        title: details.title,
-                        authors: details.authors || [], // Handle missing authors
-                        topics: details.topics,
-                        url: details.url,
-                        refs: details.refs,
-                        date: details.date
-                    };
-                })
-            );
-        } catch (error) {
-            console.error("Node loading failed:", error);
-            throw error;
-        }
-    }
-
     processAuthors() {
         const authorCounts = new Map();
 
-        this.nodes.forEach(node => {
+        this.nodesManager.getAllNodes().forEach(node => {
             (node.authors || []).forEach(author => { // Handle missing authors
                 authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
             });
@@ -466,11 +486,11 @@ export class AuthorBubbles {
 
         this.authorData = Array.from(authorCounts.entries())
             .sort(([, a], [, b]) => b - a)
+            .slice(0, 100)
             .map(([name, value]) => ({ name, value }));
     }
 
     render() {
-
         const tooltip = d3.select("body")
             .append("div")
             .attr("class", "bubble-chart-tooltip")
@@ -482,7 +502,6 @@ export class AuthorBubbles {
             .attr("height", this.height)
             .attr("viewBox", `0 0 ${this.width} ${this.height}`)
             .style("background", "transparent");
-
 
         // Create hierarchy with proper value handling
         const root = d3.hierarchy({ children: this.authorData })
@@ -496,17 +515,13 @@ export class AuthorBubbles {
         const nodes = pack(root).leaves();
 
         // Color scale with better contrast
-        // Get the min and max value for proper scaling
         const valueExtent = d3.extent(this.authorData, d => d.value);
 
-        // Linear scale to normalize value for color interpolation
         const colorPosition = d3.scaleLinear()
             .domain(valueExtent)
             .range([0, 1]);
 
-        // RGB color interpolator from light to dark (feel free to change)
         const colorInterpolator = d3.interpolateRgb("blue", "purple");
-
 
         // Node groups with optimized rendering
         const nodeGroups = svg.selectAll(".node")
@@ -563,7 +578,6 @@ export class AuthorBubbles {
             .style("paint-order", "stroke") /* Text outline for better contrast */
             .style("stroke", "rgba(0, 0, 0, 0.5)")
             .style("stroke-width", "1px");
-
     }
 
     // Helper method for text wrapping
@@ -591,6 +605,7 @@ export class AuthorBubbles {
             .text(message);
     }
 }
+
 
 
 new TopicsPlot();
