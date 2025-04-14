@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "http://localhost:8000";
 
 export async function getNodes() {
   const response = await fetch(`${BASE_URL}/nodes`);
@@ -10,7 +10,7 @@ export async function getNodes() {
 
 export async function getNodeInfo(doi) {
   const encodedDOI = encodeURIComponent(doi);
-  const response = await fetch(`${BASE_URL}/node/${encodedDOI}`);
+  const response = await fetch(`${BASE_URL}/node?doi=${encodedDOI}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch node info for DOI: ${doi}`);
   }
@@ -19,9 +19,10 @@ export async function getNodeInfo(doi) {
 
 export async function getNodeRefs(doi) {
   const encodedDOI = encodeURIComponent(doi);
-  const response = await fetch(`${BASE_URL}/refs/${encodedDOI}`);
+  const response = await fetch(`${BASE_URL}/refs?doi=${encodedDOI}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch references for DOI: ${doi}`);
   }
   return response.json();
 }
+
