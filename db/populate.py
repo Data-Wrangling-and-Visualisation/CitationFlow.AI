@@ -8,10 +8,9 @@ conn = psycopg2.connect(
     dbname=os.getenv("POSTGRES_DB"),
     user=os.getenv("POSTGRES_USER"),
     password=os.getenv("POSTGRES_PASSWORD"),
-    host=os.getenv("POSTGRES_HOST", "localhost"),
+    host=os.getenv("POSTGRES_HOST", "db"),  # Use 'db' as the hostname
     port=os.getenv("POSTGRES_PORT", "5432")
 )
-
 
 def tsv_to_json(tsv_filename, json_filename):
     """Converts a TSV file of citations into JSON format."""
@@ -85,8 +84,8 @@ def insert_article(conn, doi, article_data, citations=None):
 def main():
 
     # Load data from JSON files
-    articles_data = load_json('raw_data.json')
-    citations_data = load_json('references.json')
+    articles_data = load_json('./data/raw_data.json')
+    citations_data = load_json('./data/references.json')
 
     # Create table
     create_tables(conn)
