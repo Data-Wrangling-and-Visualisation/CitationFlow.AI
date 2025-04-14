@@ -4,7 +4,10 @@ function randomDOI(i) {
 
 function randomTerms() {
   const terms = ['AI', 'ML', 'Bioinformatics', 'NLP', 'Vision', 'Data Mining'];
-  return [terms[Math.floor(Math.random() * terms.length)], terms[Math.floor(Math.random() * terms.length)]];
+  return [
+    terms[Math.floor(Math.random() * terms.length)],
+    terms[Math.floor(Math.random() * terms.length)]
+  ];
 }
 
 function randomAuthors() {
@@ -14,11 +17,19 @@ function randomAuthors() {
   );
 }
 
+function randomDate() {
+  const year = 2020 + Math.floor(Math.random() * 5);
+  const month = String(Math.floor(Math.random() * 12 + 1)).padStart(2, '0');
+  const day = String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function generateNodes(n = 100) {
   return Array.from({ length: n }, (_, i) => ({
     doi: randomDOI(i),
     terms: randomTerms(),
     refs: Math.floor(Math.random() * 4),
+    date: randomDate() // ⬅️ Date added here
   }));
 }
 
@@ -35,7 +46,7 @@ export async function getNodeInfo(doi) {
     doi: node.doi,
     title: `A Study on ${node.terms[0]}`,
     authors: randomAuthors(),
-    date: `202${Math.floor(Math.random() * 5)}-0${Math.floor(Math.random() * 9) + 1}-15`,
+    date: node.date,
     topics: node.terms,
     url: `https://doi.org/${node.doi}`,
     refs: node.refs
