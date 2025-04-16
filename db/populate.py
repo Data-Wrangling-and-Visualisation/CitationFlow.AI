@@ -47,6 +47,7 @@ def create_tables(conn):
             CREATE TABLE IF NOT EXISTS articles (
                 doi VARCHAR PRIMARY KEY,
                 title TEXT,
+                topics TEXT[],
                 publish_date TIMESTAMP,
                 url TEXT,
                 authors TEXT[],
@@ -61,7 +62,8 @@ def insert_article(conn, doi, article_data, citations=None):
         title = article_data.get('title')
         date_str = article_data.get('date')
         url = article_data.get('url')
-        authors = article_data.get('author')  # list of authors
+        authors = article_data.get('author')
+        topics = ['ML', 'ML']
 
         # Convert date string to datetime object
         publish_date = None
@@ -73,15 +75,16 @@ def insert_article(conn, doi, article_data, citations=None):
 
         # Insert with conflict handling
         cur.execute("""
-            INSERT INTO articles (doi, title, publish_date, url, authors, citations)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO articles (doi, title, topics, publish_date, url, authors, citations)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (doi) DO UPDATE SET
+                topics = EXCLUDED.topics,
                 title = EXCLUDED.title,
                 publish_date = EXCLUDED.publish_date,
                 url = EXCLUDED.url,
                 authors = EXCLUDED.authors,
                 citations = EXCLUDED.citations;
-        """, (doi, title, publish_date, url, authors, citations))
+        """, (doi, title, topics, publish_date, url, authors, citations))
         conn.commit()
 
 def main():

@@ -19,7 +19,6 @@ export class GraphVisualizer {
     init() {
         this.createTooltip();
         this.initSVG();
-        this.createLegend();
         this.loadAndVisualizeData();
     }
 
@@ -28,15 +27,39 @@ export class GraphVisualizer {
             .attr("class", "tooltip").style("opacity", 0);
     }
 
+
+
     async loadAndVisualizeData() {
         try {
             const rawNodes = await getNodes();
+
+            const allTerms = new Set();
+            rawNodes.forEach(node => {
+                if (Array.isArray(node.topics)) {
+                    node.topics.forEach(term => allTerms.add(term));
+                }
+            });
+
+            const uniqueTerms = Array.from(allTerms);
+
+            const colorMap = new Map();
+            uniqueTerms.forEach((term, index) => {
+                const t = index / (uniqueTerms.length - 1 || 1);
+                colorMap.set(term, d3.interpolateRgb("blue", "purple")(t));
+            });
+
+            this.termColors = Object.fromEntries(colorMap);
+            console.log(this.termColors);
             const graphData = this.prepareGraphData(rawNodes);
             this.initializeSimulation(graphData);
+
+            this.createLegend();
+
         } catch (error) {
             console.error("Error loading data:", error);
         }
     }
+
 
     prepareGraphData(nodes) {
         const doiMap = new Map();
@@ -51,7 +74,7 @@ export class GraphVisualizer {
                 id: node.doi,
                 x: centerX + (Math.random() - 0.5) * spread,
                 y: centerY + (Math.random() - 0.5) * spread,
-                color: this.blendColors(node.topics)
+                color: this.termColors[node.topics[0]]
             };
             doiMap.set(node.doi, nodeObj);
             return nodeObj;
@@ -81,7 +104,7 @@ export class GraphVisualizer {
 
         const node = this.svgGroup.selectAll(".node")
             .data(graphData.nodes, d => d.id).enter().append("circle")
-            .attr("class", "node").attr("r", 8).style("fill", d => d.color)
+            .attr("class", "node").attr("r", 16).style("fill", d => d.color)
             .attr("stroke", "#fff").attr("stroke-width", 1.5)
             .on("mouseover", (e, d) => this.showTooltip(e, d))
             .on("mouseout", () => this.hideTooltip())
@@ -100,10 +123,7 @@ export class GraphVisualizer {
         this.simulation = d3.forceSimulation(graphData.nodes)
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(80).strength(1.5))
             .force("charge", d3.forceManyBody().strength(-10))
-            .force("center", d3.forceCenter(this.width / 2, this.height / 2).strength(1))
-            .force("collision", d3.forceCollide().radius(200))
-            .force("x", d3.forceX(this.width / 2).strength(0.01))
-            .force("y", d3.forceY(this.height / 2).strength(0.01))
+            .force("collision", d3.forceCollide().radius(100))
             .alphaDecay(0.05).velocityDecay(0.3)
             .on("tick", () => this.tickHandler(link, node));
     }
@@ -181,17 +201,6 @@ export class GraphVisualizer {
             .style("opacity", d =>
                 this.activeFilters.size === 0 || d.topics.some(t => this.activeFilters.has(t)) ? 1 : 0.2
             );
-    }
-
-    blendColors(terms) {
-        if (!terms?.length) return '#CCCCCC';
-        const validTerms = terms.filter(term => this.termColors[term]);
-        if (!validTerms.length) return '#CCCCCC';
-
-        const rgb = validTerms.map(term => this.hexToRgb(this.termColors[term]));
-        const avg = rgb.reduce((acc, [r, g, b]) => [acc[0] + r, acc[1] + g, acc[2] + b], [0, 0, 0])
-            .map(val => Math.round(val / validTerms.length));
-        return `rgb(${avg.join(',')})`;
     }
 
     hexToRgb(hex) {
