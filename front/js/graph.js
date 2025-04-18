@@ -60,7 +60,7 @@ export class GraphVisualizer {
         const doiMap = new Map();
 
         const processedNodes = nodes.map(node => {
-            const spread = 1000;
+            const spread = 10000;
             const centerX = this.width / 2;
             const centerY = this.height / 2;
 
@@ -110,15 +110,11 @@ export class GraphVisualizer {
                 .on("end", (e, d) => this.dragended(e, d))
             );
 
-        graphData.nodes.forEach(d => {
-            d.x = this.width / 2 + (Math.random() - 0.5) * 100;
-            d.y = this.height / 2 + (Math.random() - 0.5) * 100;
-        });
-
         this.simulation = d3.forceSimulation(graphData.nodes)
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(80).strength(1.5))
             .force("charge", d3.forceManyBody().strength(-1))
             .force("collision", d3.forceCollide().radius(100))
+            .force("center", d3.forceCenter(this.width / 2, this.height / 2))
             .alphaDecay(0.1).velocityDecay(0.3)
             .on("tick", () => this.tickHandler(link, node));
     }
