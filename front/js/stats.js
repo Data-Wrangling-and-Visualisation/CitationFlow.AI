@@ -362,7 +362,7 @@ export class DatePlot {
 
         bars.append("rect")
             .attr("x", 0)
-            .attr("y", d => y(d.year))
+            .attr("y", d => y(d.month))
             .attr("width", 0)
             .attr("height", y.bandwidth())
             .attr("fill", d => colorScale(d))
@@ -479,7 +479,7 @@ export class AuthorBubbles {
         const authorCounts = new Map();
 
         this.nodesManager.getAllNodes().forEach(node => {
-            (node.authors || []).forEach(author => { // Handle missing authors
+            (node.authors || []).forEach(author => { 
                 authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
             });
         });
@@ -488,6 +488,8 @@ export class AuthorBubbles {
             .sort(([, a], [, b]) => b - a)
             .slice(0, 100)
             .map(([name, value]) => ({ name, value }));
+
+        console.log(this.authorData);
     }
 
     render() {

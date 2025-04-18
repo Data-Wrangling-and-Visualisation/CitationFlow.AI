@@ -21,7 +21,7 @@ async def get_connection():
 async def get_all_articles():
     """Fetch all articles from the database."""
     conn = await get_connection()
-    rows = await conn.fetch("SELECT doi, title, publish_date, url, authors, citations FROM articles LIMIT 1000")
+    rows = await conn.fetch("SELECT doi, title, publish_date, url, authors, citations FROM articles LIMIT 2000")
     await conn.close()
     
     # Return articles as a list of dictionaries
