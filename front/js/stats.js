@@ -12,7 +12,7 @@ class Nodes {
             const nodeDetails = await this.mapNodeDetails(basicNodes);
             this.nodes = nodeDetails;
         } catch (error) {
-            console.error("Error loading nodes:", error);
+            console.error("Error loading nodes Marsel)))_:", error);
         }
     }
 
@@ -580,19 +580,6 @@ export class AuthorBubbles {
             .style("paint-order", "stroke") /* Text outline for better contrast */
             .style("stroke", "rgba(0, 0, 0, 0.5)")
             .style("stroke-width", "1px");
-    }
-
-    // Helper method for text wrapping
-    wrapText(selection) {
-        selection.each(function (d) {
-            const text = d3.select(this);
-            const words = d.data.name.split(/\s+/);
-            const maxLength = Math.floor(d.r / 4);
-
-            if (words.some(word => word.length > maxLength)) {
-                text.text(words[0].substring(0, maxLength) + "...");
-            }
-        });
     }
 
     showErrorMessage(message) {
