@@ -7,10 +7,6 @@ export class GraphVisualizer {
     }
 
     config() {
-        this.termColors = {
-            'AI': '#FF6B6B', 'ML': '#4ECDC4', 'Bioinformatics': '#45B7D1',
-            'NLP': '#96CEB4', 'Vision': '#FFEEAD', 'Data Mining': '#D4A5A5'
-        };
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.activeFilters = new Set();
@@ -26,7 +22,6 @@ export class GraphVisualizer {
         this.tooltip = d3.select("body").append("div")
             .attr("class", "tooltip").style("opacity", 0);
     }
-
 
 
     async loadAndVisualizeData() {
@@ -122,9 +117,9 @@ export class GraphVisualizer {
 
         this.simulation = d3.forceSimulation(graphData.nodes)
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(80).strength(1.5))
-            .force("charge", d3.forceManyBody().strength(-10))
+            .force("charge", d3.forceManyBody().strength(-1))
             .force("collision", d3.forceCollide().radius(100))
-            .alphaDecay(0.05).velocityDecay(0.3)
+            .alphaDecay(0.1).velocityDecay(0.3)
             .on("tick", () => this.tickHandler(link, node));
     }
 
@@ -140,11 +135,9 @@ export class GraphVisualizer {
             <span style="background:${this.termColors[term]};color:white;padding:2px 8px;border-radius:12px;margin:2px;display:inline-block;font-size:0.8em;">${term}</span>
         `).join('');
 
-        const cleanTitle = d.title.replace(/^{"|"}$/g, '');
-
         this.tooltip.style("opacity", 1).html(`
             <div style="text-align:center;padding:8px;">
-                <strong style="display:block;margin-bottom:6px;">${cleanTitle}</strong>
+                <strong style="display:block;margin-bottom:6px;">${d.title}</strong>
                 <div>${d.authors.join(", ")}</div>
                 <div style="margin:4px 0;">${d.id}</div>
                 <div style="margin-top:6px;">${topicTags}</div>

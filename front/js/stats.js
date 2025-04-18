@@ -262,7 +262,6 @@ export class TopicsPlot {
             .style("opacity", 1);
     }
 
-    // Hide the tooltip
     hideTooltip() {
         d3.selectAll(".tooltip")
             .transition()
@@ -275,7 +274,7 @@ export class TopicsPlot {
 
 export class DatePlot {
     constructor() {
-        this.nodesManager = new Nodes();  // Use the Nodes class
+        this.nodesManager = new Nodes();
         this.initContainer();
         this.loadAndRender();
     }
@@ -298,7 +297,7 @@ export class DatePlot {
         let totalArticles = 0;
 
         nodes.forEach(node => {
-            const year = node.date ? node.date.split("T")[0].split("-")[0] : "Unknown"; // Extract year
+            const year = node.date ? node.date.split("T")[0].split("-")[0] : "Unknown";
             yearCounts.set(year, (yearCounts.get(year) || 0) + 1);
             totalArticles++;
         });
@@ -326,7 +325,6 @@ export class DatePlot {
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Create a linear scale to map years to the 0–1 range
         const yearExtent = d3.extent(data, d => d.year);
         const colorPosition = d3.scaleLinear()
             .domain(yearExtent)
@@ -362,15 +360,15 @@ export class DatePlot {
 
         bars.append("rect")
             .attr("x", 0)
-            .attr("y", d => y(d.month))
+            .attr("y", d => y(d.year))
             .attr("width", 0)
             .attr("height", y.bandwidth())
             .attr("fill", d => colorScale(d))
-            .on("click", (event, d) => this.highlightBarAndShowTable(d)) // <-- Moved here
+            .on("click", (event, d) => this.highlightBarAndShowTable(d))
             .transition()
             .duration(3000)
             .attr("width", d => x(d.count));
-
+        
         svg.append("text")
             .attr("x", chartWidth / 2)
             .attr("y", -10)

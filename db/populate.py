@@ -59,11 +59,11 @@ def create_tables(conn):
 def insert_article(conn, doi, article_data, citations=None):
     """Inserts or updates an article record in the articles table."""
     with conn.cursor() as cur:
-        title = article_data.get('title')
+        title = article_data.get('title')[0].strip('"{}') if len(article_data.get('title')) >= 1 else "Title missing"
         date_str = article_data.get('date')
         url = article_data.get('url')
         authors = article_data.get('author')
-        topics = ['ML', 'ML']
+        topics = ['ML', 'AI']
 
         # Convert date string to datetime object
         publish_date = None
