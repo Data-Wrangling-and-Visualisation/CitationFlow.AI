@@ -105,18 +105,15 @@ export class TopicsPlot {
     // Load nodes and render the chart
     async loadAndRender() {
         await this.nodesManager.loadNodes();  // Load nodes data
-        this.nodes = this.nodesManager.getAllNodes();  // Retrieve the loaded nodes
+        this.nodes = this.nodesManager.getAllNodes();  // Retrieve the loaded nodes]
 
-        // Dynamically extract terms and generate colors for the topics
         this.terms = this.extractAllTerms(this.nodes);
         this.termColors = this.generateTermColors(this.terms);
 
-        // Process the nodes data
         const processedData = this.processNodes(this.nodes);
         this.createChart(processedData);
     }
 
-    // Process the nodes to count occurrences of each term
     processNodes(nodes) {
         const termCounts = new Map();
         let totalTerms = 0;
@@ -137,7 +134,6 @@ export class TopicsPlot {
         })).filter(d => d.count > 0);
     }
 
-    // Create the pie chart
     createChart(data) {
         const width = 500;
         const height = 500;
@@ -368,7 +364,7 @@ export class DatePlot {
             .transition()
             .duration(3000)
             .attr("width", d => x(d.count));
-        
+
         svg.append("text")
             .attr("x", chartWidth / 2)
             .attr("y", -10)
@@ -477,8 +473,10 @@ export class AuthorBubbles {
         const authorCounts = new Map();
 
         this.nodesManager.getAllNodes().forEach(node => {
-            (node.authors || []).forEach(author => { 
-                authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
+            (node.authors || []).forEach(author => {
+                if (author.length >= 3) {
+                    authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
+                };
             });
         });
 
