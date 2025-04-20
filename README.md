@@ -20,14 +20,14 @@
 ---
 
 ## 🚀 Project Overview  
-**CitationFlow.AI** is an interactive visualization tool that maps AI research literature as a dynamic citation network, helping users uncover trends, connections, and emerging topics.  
+**CitationFlow.AI** is an interactive visualization tool that maps AI research field as a dynamic citation network, helping users uncover trends, connections, and emerging topics. With use of **CitationFlow.AI** users can explore large research fields with no need to read huge numbers of articles.
 
 ### 🔑 Key Features  
 | Feature | Description |  
 |---------|-------------|  
 | **Graph Visualization** | Articles as nodes, citations as edges in an interactive force-directed graph. |  
-| **Popularity Metrics** | Node size/color reflects citation count and influence. |  
-| **Dynamic Filtering** | Search, filter, and drill down into specific research areas. |  
+| **Statistics** | Statistics about dataset, most popular topics and authors |  
+| **Dynamic Filtering** | Filter and drill down into specific research areas. |  
 
 **Target Audience**: Researchers, AI practitioners, and students exploring AI literature.  
 
@@ -42,7 +42,8 @@
 |------------|------|  
 | ![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python) | Data processing, API integration, and backend logic. |  
 | ![Pandas](https://img.shields.io/badge/Pandas-2.0%2B-150458?logo=pandas) | Data cleaning and transformation. |  
-| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?logo=postgresql) | Scalable storage for citation networks. |  
+| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?logo=postgresql) | Scalable storage for citation networks. | 
+| ![FastAPI]()
 
 ### 🎨 Frontend & Visualization  
 | Technology | Role |  
@@ -73,7 +74,7 @@ And launch docker-compose
 ```bash
 docker-compose up --build
 ```
-Access the app at: [http://localhost:8080](http://localhost:8080)  
+Access the app at: [http://localhost](http://localhost)  
 
 ---
 
@@ -83,8 +84,8 @@ Access the app at: [http://localhost:8080](http://localhost:8080)
 | **Setup & API Integration** | ✅ | Project scaffolding, ScienceDirect API exploration |  
 | **Data Pipeline** | ✅ | Data extraction, cleaning, and DB schema design |  
 | **Visualization** | ✅ | D3.js graph implementation |  
-| **UI/UX Refinement** | 🟡 | Filtering, search, and responsive design |  
-| **Optimization** | 🟠 | Performance tuning and stress testing |  
+| **UI/UX Refinement** | ✅ | Filtering, search, and responsive design |  
+| **Optimization** | ✅ | Performance tuning and stress testing |  
 
 ---
 
