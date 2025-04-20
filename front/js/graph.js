@@ -97,7 +97,6 @@ export class GraphVisualizer {
             const centerX = col * cellWidth + cellWidth / 2;
             const centerY = row * cellHeight + cellHeight / 2;
 
-            // Spread nodes within cluster area
             cluster.forEach((node) => {
                 const x = centerX;
                 const y = centerY;
@@ -130,7 +129,7 @@ export class GraphVisualizer {
         return {
             nodes: processedNodes,
             links: allLinks,
-            grid: {  // Add grid information to the return object
+            grid: {
                 size: gridSize,
                 cellWidth,
                 cellHeight
@@ -156,7 +155,7 @@ export class GraphVisualizer {
 
         const node = this.svgGroup.selectAll(".node")
             .data(nodes, d => d.doi).enter().append("circle")
-            .attr("class", "node").attr("r", 16).style("fill", d => d.color)
+            .attr("class", "node").attr("r", 100).style("fill", d => d.color)
             .attr("stroke", "#fff").attr("stroke-width", 1.5)
             .on("mouseover", (e, d) => this.showTooltip(e, d))
             .on("mouseout", () => this.hideTooltip())
@@ -180,7 +179,6 @@ export class GraphVisualizer {
             .velocityDecay(0.1)
             .on("tick", () => this.tickHandler(link, node));
 
-        // Now these variables are available
         this.simulation.force("cluster", d3.forceY(d => {
             const row = Math.floor(d.cluster / gridSize);
             return row * cellHeight + cellHeight / 2;
@@ -190,28 +188,29 @@ export class GraphVisualizer {
             const col = d.cluster % gridSize;
             return col * cellWidth + cellWidth / 2;
         }).strength(0.1));
+
     }
 
 
-tickHandler(link, node) {
-    link
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
+    tickHandler(link, node) {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
 
-    node
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
-}
+        node
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+    }
 
 
-showTooltip(event, d) {
-    const topicTags = d.topics.map(term => `
+    showTooltip(event, d) {
+        const topicTags = d.topics.map(term => `
             <span style="background:${this.termColors[term]};color:white;padding:2px 8px;border-radius:12px;margin:2px;display:inline-block;font-size:0.8em;">${term}</span>
         `).join('');
 
-    this.tooltip.style("opacity", 1).html(`
+        this.tooltip.style("opacity", 1).html(`
             <div style="text-align:center;padding:8px;">
                 <strong style="display:block;margin-bottom:6px;">${d.title}</strong>
                 <div>${d.authors.join(", ")}</div>
@@ -219,69 +218,69 @@ showTooltip(event, d) {
                 <div style="margin-top:6px;">${topicTags}</div>
             </div>
         `).style("left", `${event.pageX + 10}px`).style("top", `${event.pageY + 10}px`);
-}
+    }
 
-hideTooltip() {
-    this.tooltip.style("opacity", 0);
-}
+    hideTooltip() {
+        this.tooltip.style("opacity", 0);
+    }
 
-createLegend() {
-    this.legend = d3.select("body").append("div").attr("class", "legend")
-        .style("background", "#171E28").style("padding", "12px 16px")
-        .style("border-radius", "8px").style("box-shadow", "0 2px 6px rgba(0,0,0,0.2)")
-        .style("color", "white").style("text-align", "center")
-        .html("<h2 style='margin:0 0 12px 0; font-size:1.2em;'>Topics</h2>");
+    createLegend() {
+        this.legend = d3.select("body").append("div").attr("class", "legend")
+            .style("background", "#171E28").style("padding", "12px 16px")
+            .style("border-radius", "8px").style("box-shadow", "0 2px 6px rgba(0,0,0,0.2)")
+            .style("color", "white").style("text-align", "center")
+            .html("<h2 style='margin:0 0 12px 0; font-size:1.2em;'>Topics</h2>");
 
-    const legendItems = this.legend.append("div")
-        .style("display", "flex").style("flex-direction", "column").style("gap", "6px");
+        const legendItems = this.legend.append("div")
+            .style("display", "flex").style("flex-direction", "column").style("gap", "6px");
 
-    Object.entries(this.termColors).forEach(([term, color]) => {
-        const item = legendItems.append("div")
-            .style("display", "flex").style("justify-content", "center")
-            .style("cursor", "pointer").on("click", () => this.handleLegendClick(term));
+        Object.entries(this.termColors).forEach(([term, color]) => {
+            const item = legendItems.append("div")
+                .style("display", "flex").style("justify-content", "center")
+                .style("cursor", "pointer").on("click", () => this.handleLegendClick(term));
 
-        item.append("span")
-            .style("background", color).style("color", "white")
-            .style("padding", "5px 14px").style("border-radius", "15px")
-            .style("font-size", "0.85em").style("display", "inline-block")
-            .style("text-align", "center").style("transition", "all 0.2s ease")
-            .style("border", "2px solid transparent").text(term);
-    });
-}
+            item.append("span")
+                .style("background", color).style("color", "white")
+                .style("padding", "5px 14px").style("border-radius", "15px")
+                .style("font-size", "0.85em").style("display", "inline-block")
+                .style("text-align", "center").style("transition", "all 0.2s ease")
+                .style("border", "2px solid transparent").text(term);
+        });
+    }
 
-handleLegendClick(term) {
-    this.activeFilters.has(term) ? this.activeFilters.delete(term) : this.activeFilters.add(term);
-    this.updateLegendAppearance();
-    this.updateNodeVisibility();
-}
+    handleLegendClick(term) {
+        this.activeFilters.has(term) ? this.activeFilters.delete(term) : this.activeFilters.add(term);
+        this.updateLegendAppearance();
+        this.updateNodeVisibility();
+    }
 
-updateLegendAppearance() {
-    this.legend.selectAll("div").each((_, i, nodes) => {
-        const span = d3.select(nodes[i]).select("span");
-        const term = span.text();
-        const isActive = this.activeFilters.has(term);
-        span.style("border", isActive ? "2px solid white" : "2px solid transparent")
-            .style("transform", isActive ? "scale(1.05)" : "scale(1)");
-    });
-}
+    updateLegendAppearance() {
+        this.legend.selectAll("div").each((_, i, nodes) => {
+            const span = d3.select(nodes[i]).select("span");
+            const term = span.text();
+            const isActive = this.activeFilters.has(term);
+            span.style("border", isActive ? "2px solid white" : "2px solid transparent")
+                .style("transform", isActive ? "scale(1.05)" : "scale(1)");
+        });
+    }
 
-updateNodeVisibility() {
-    this.svgGroup.selectAll(".node").transition().duration(200)
-        .style("opacity", d =>
-            this.activeFilters.size === 0 || d.topics.some(t => this.activeFilters.has(t)) ? 1 : 0.2
-        );
-}
+    updateNodeVisibility() {
+        this.svgGroup.selectAll(".node").transition().duration(200)
+            .style("opacity", d =>
+                this.activeFilters.size === 0 || d.topics.some(t => this.activeFilters.has(t)) ? 1 : 0.2
+            );
+    }
 
-createTooltip() {
-    this.tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip").style("opacity", 0);
-}
+    createTooltip() {
+        this.tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip").style("opacity", 0);
+    }
 
-destroy() {
-    this.svg?.remove();
-    this.tooltip?.remove();
-    this.legend?.remove();
-}
+    destroy() {
+        this.svg?.remove();
+        this.tooltip?.remove();
+        this.legend?.remove();
+    }
 }
 
 new GraphVisualizer();
