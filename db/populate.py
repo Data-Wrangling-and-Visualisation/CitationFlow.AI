@@ -94,6 +94,7 @@ def insert_article(conn, doi, article_data, citations=None):
 
 def main():
 
+    print("Starting to populating DB")
     # Load data from JSON files
     articles_data = load_json('./data/raw_data.json')
     citations_data = load_json('./data/references.json')
