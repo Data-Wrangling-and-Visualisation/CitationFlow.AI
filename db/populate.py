@@ -63,7 +63,12 @@ def insert_article(conn, doi, article_data, citations=None):
         date_str = article_data.get('date')
         url = article_data.get('url')
         authors = article_data.get('author')
-        topics = ['ML', 'AI']
+        topics = article_data.get('topic')
+
+        if topics is not None:
+            topics = [topics]
+        else:
+            return 0
 
         # Convert date string to datetime object
         publish_date = None
