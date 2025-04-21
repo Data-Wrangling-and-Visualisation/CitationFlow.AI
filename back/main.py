@@ -6,12 +6,16 @@ import uvicorn
 
 app = FastAPI()
 
-# Allow frontend access
+origins = [
+    "http://localhost",    
+    "http://localhost:80",  
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict to your frontend domain
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
 
