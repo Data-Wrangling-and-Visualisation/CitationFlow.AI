@@ -31,14 +31,7 @@ async def get_nodes():
         return articles
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching articles")
-
-@app.get("/clusters")
-async def get_clusters():
-    try:
-        clusters = await get_clusters()
-        return clusters
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error fetching clusters")
+    
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

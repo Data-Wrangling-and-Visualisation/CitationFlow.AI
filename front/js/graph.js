@@ -1,4 +1,4 @@
-import { getNodes, getClusters } from './api.js';
+import { getNodes } from './api.js';
 import { GRADIENT } from './config.js';
 
 export class GraphVisualizer {
@@ -53,12 +53,17 @@ export class GraphVisualizer {
         }
     }
 
-
     prepareGraphData(nodes) {
         const visited = new Set();
         const clusters = [];
 
-        // First pass: identify all clusters
+        // Preprocess refs for fast lookup
+        const nodeRefsMap = new Map();
+        nodes.forEach(node => {
+            nodeRefsMap.set(node.doi, new Set(node.refs || []));
+        });
+
+        // First pass: identify all clusters based on references
         for (const node of nodes) {
             if (visited.has(node.doi)) continue;
 
@@ -66,7 +71,7 @@ export class GraphVisualizer {
             const queue = [node.doi];
             visited.add(node.doi);
 
-            // BFS to find connected components
+            // BFS to find connected components (based on references)
             while (queue.length > 0) {
                 const currentDOI = queue.shift();
 
@@ -74,9 +79,9 @@ export class GraphVisualizer {
                 for (const otherNode of nodes) {
                     if (visited.has(otherNode.doi)) continue;
 
-                    // Check if nodes are connected in either direction
-                    if ((otherNode.refs || []).includes(currentDOI) ||
-                        (node.refs || []).includes(otherNode.doi)) {
+                    // Check if nodes are connected in either direction using preprocessed refs
+                    if (nodeRefsMap.get(otherNode.doi).has(currentDOI) ||
+                        nodeRefsMap.get(currentDOI).has(otherNode.doi)) {
                         cluster.add(otherNode.doi);
                         visited.add(otherNode.doi);
                         queue.push(otherNode.doi);
@@ -84,37 +89,38 @@ export class GraphVisualizer {
                 }
             }
 
+            // Convert the cluster set to an array and chunk it (limit cluster size to 10)
             const fullCluster = Array.from(cluster);
-            for (let i = 0; i < fullCluster.length; i += 3) {
-                const chunk = fullCluster.slice(i, i + 3);
+            for (let i = 0; i < fullCluster.length; i += 10) {
+                const chunk = fullCluster.slice(i, i + 10);
                 clusters.push(chunk.map(doi => nodes.find(n => n.doi === doi)));
             }
         }
 
-        // Position clusters in grid
-        const gridSize = Math.ceil(Math.sqrt(clusters.length));
-        const cellWidth = 300000 / Math.max(1, gridSize);
-        const cellHeight = 300000 / Math.max(1, gridSize);
+        // Position clusters in grid (dynamically adjust based on the number of clusters)
+        const gridSize = Math.ceil(18);
+        const cellWidth = Math.max(1, 50000 / gridSize);
+        const cellHeight = Math.max(1, 50000 / gridSize);
 
         const processedNodes = [];
         const allLinks = [];
         const nodeMap = new Map();
 
-        clusters.forEach((cluster, clusterIndex) => {
+        // Filter out clusters with only one node
+        const filteredClusters = clusters.filter(cluster => cluster.length > 1);
+
+        filteredClusters.forEach((cluster, clusterIndex) => {
             const row = Math.floor(clusterIndex / gridSize);
             const col = clusterIndex % gridSize;
-            const centerX = col * cellWidth + cellWidth / 2;
-            const centerY = row * cellHeight + cellHeight / 2;
+            const centerX = col * cellWidth + cellWidth / 2 - 25000;
+            const centerY = row * cellHeight + cellHeight / 2 - 25000;
 
             cluster.forEach((node) => {
-                const x = centerX;
-                const y = centerY;
-
                 const nodeObj = {
                     ...node,
-                    color: this.termColors[node.topics?.[0]],
-                    x,
-                    y,
+                    color: this.termColors[node.topics?.[0]] || "#ccc", // Default color if undefined
+                    x: centerX,
+                    y: centerY,
                     cluster: clusterIndex
                 };
 
@@ -123,16 +129,58 @@ export class GraphVisualizer {
             });
         });
 
-        // Process all links
+        // Process links based on references and ensure they're within the same cluster
         nodes.forEach(source => {
+            const sourceCluster = nodeMap.get(source.doi)?.cluster;
+
             (source.refs || []).forEach(targetDOI => {
-                if (nodeMap.has(source.doi) && nodeMap.has(targetDOI)) {
-                    allLinks.push({
-                        source: source.doi,
-                        target: targetDOI
-                    });
+                const targetNode = nodeMap.get(targetDOI);
+
+                // Only create a link if the source and target belong to the same cluster
+                if (targetNode) {
+                    const targetCluster = targetNode.cluster;
+                    if (sourceCluster === targetCluster) {
+                        // Create link if they are in the same cluster and referencing each other
+                        allLinks.push({
+                            source: source.doi,
+                            target: targetDOI
+                        });
+                    }
                 }
             });
+        });
+
+        // Ensure we also create intra-cluster links by checking references between nodes
+        filteredClusters.forEach(cluster => {
+            // Create links between nodes that reference each other within the same cluster
+            cluster.forEach((node) => {
+                const sourceDOI = node.doi;
+                const nodeRefs = nodeRefsMap.get(sourceDOI) || [];
+                nodeRefs.forEach(refDOI => {
+                    // Check if the reference node is in the same cluster
+                    const targetNode = nodeMap.get(refDOI);
+                    if (targetNode && targetNode.cluster === node.cluster) {
+                        allLinks.push({
+                            source: sourceDOI,
+                            target: refDOI
+                        });
+                    }
+                });
+            });
+
+            // Add fallback link for disjoint nodes in a cluster
+            if (cluster.length > 1) {
+                const firstNode = cluster[0];
+                cluster.forEach((node, index) => {
+                    if (node.doi !== firstNode.doi) {
+                        // Link any disjoint node to the first node in the cluster
+                        allLinks.push({
+                            source: node.doi,
+                            target: firstNode.doi
+                        });
+                    }
+                });
+            }
         });
 
         return {
@@ -145,6 +193,7 @@ export class GraphVisualizer {
             }
         };
     }
+
 
     initSVG() {
         this.svg = d3.select("#graph").append("svg")
@@ -160,7 +209,8 @@ export class GraphVisualizer {
 
         const link = this.svgGroup.selectAll(".link")
             .data(links).enter().append("line")
-            .attr("class", "link");
+            .attr("class", "link")
+            .attr("stroke-width", 4);
 
         const node = this.svgGroup.selectAll(".node")
             .data(nodes, d => d.doi).enter().append("circle")
@@ -199,7 +249,6 @@ export class GraphVisualizer {
         }).strength(0.1));
 
     }
-
 
     tickHandler(link, node) {
         link

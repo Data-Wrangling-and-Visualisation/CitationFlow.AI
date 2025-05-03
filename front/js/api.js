@@ -9,11 +9,3 @@ export async function getNodes() {
   }
   return response.json();
 }
-
-export async function getClusters() {
-  const response = await fetch(`${ENDPOINT}/clusters`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch nodes");
-  }
-  return response.json();
-}
