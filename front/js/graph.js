@@ -228,26 +228,13 @@ export class GraphVisualizer {
         this.simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links)
                 .id(d => d.doi)
-                .distance(80)
-                .strength(0.7))
-            .force("x", d3.forceX(d => d.x).strength(1))
-            .force("y", d3.forceY(d => d.y).strength(1))
-            .force("collision", d3.forceCollide(200))
-            .alpha(1)
-            .alphaDecay(0.1)
-            .velocityDecay(0.1)
+                .distance(200)
+                .strength(0.5))
+            .force("x", d3.forceX(d => d.x).strength(0.5))
+            .force("y", d3.forceY(d => d.y).strength(0.5))
+            .force("collision", d3.forceCollide(200).strength(1))
+            .velocityDecay(0.5)
             .on("tick", () => this.tickHandler(link, node));
-
-        this.simulation.force("cluster", d3.forceY(d => {
-            const row = Math.floor(d.cluster / gridSize);
-            return row * cellHeight + cellHeight / 2;
-        }).strength(0.1));
-
-        this.simulation.force("clusterX", d3.forceX(d => {
-            const col = d.cluster % gridSize;
-            return col * cellWidth + cellWidth / 2;
-        }).strength(0.1));
-
     }
 
     tickHandler(link, node) {
@@ -268,6 +255,11 @@ export class GraphVisualizer {
             <span style="background:${this.termColors[term]};color:white;padding:2px 8px;border-radius:12px;margin:2px;display:inline-block;font-size:0.8em;">${term}</span>
         `).join('');
 
+        d3.select(event.target)
+            .transition()
+            .duration(200)
+            .attr("r", 144);
+
         this.tooltip.style("opacity", 1).html(`
             <div style="text-align:center;padding:8px;">
                 <strong style="display:block;margin-bottom:6px;">${d.title}</strong>
@@ -279,6 +271,10 @@ export class GraphVisualizer {
     }
 
     hideTooltip() {
+        d3.select(event.target)
+            .transition()
+            .duration(200)
+            .attr("r", 100);
         this.tooltip.style("opacity", 0);
     }
 
@@ -338,6 +334,22 @@ export class GraphVisualizer {
         this.svg?.remove();
         this.tooltip?.remove();
         this.legend?.remove();
+    }
+    dragstarted(event, d) {
+        if (!event.active) this.simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    dragended(event, d) {
+        if (!event.active) this.simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
     }
 }
 
