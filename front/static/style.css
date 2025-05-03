@@ -1,6 +1,8 @@
 /* ==================== */
 /* CSS Variables        */
 /* ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Martian+Mono:wght@100..800&display=swap');
+
 :root {
     /* Colors */
     --primary-bg: #0D1117;
@@ -40,8 +42,8 @@
 /* ==================== */
 body {
     margin: 0;
+    font-family: "Martian Mono", monospace;
     overflow: hidden;
-    font-family: Arial, sans-serif;
     background: var(--primary-bg);
     color: var(--text-color);
     line-height: 1.6;
@@ -218,7 +220,6 @@ body {
     background: rgba(0, 0, 0, 0.8);
     color: white;
     border-radius: 6px;
-    font-family: 'Segoe UI', sans-serif;
     font-size: 14px;
     max-width: 300px;
     backdrop-filter: blur(4px);
@@ -312,7 +313,6 @@ table {
     background: var(--tertiary-bg);
     border-radius: var(--radius-md);
     table-layout: fixed;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: var(--text-lg);
 }
 
