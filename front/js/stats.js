@@ -1,4 +1,5 @@
 import { getNodes } from './api.js';
+import { GRADIENT } from './config.js';
 
 class Nodes {
     constructor() {
@@ -67,7 +68,10 @@ class Nodes {
 
 export class TopicsPlot {
     constructor() {
-        this.gradient = d3.interpolateRgb("blue", "purple"); // Color gradient
+        this.gradient = d3.scaleLinear()
+            .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
+            .range(GRADIENT)
+            .interpolate(d3.interpolateRgb);
         this.nodesManager = new Nodes();  // Use the Nodes class
         this.initContainer();
         this.loadAndRender();
@@ -326,7 +330,7 @@ export class DatePlot {
             .domain(yearExtent)
             .range([0, 1]);
 
-        const colorScale = d => d3.interpolateRgb("blue", "purple")(colorPosition(d.year));
+        const colorScale = d => d3.interpolateRgb(GRADIENT[0], GRADIENT[4])(colorPosition(d.year));
 
         const x = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.count)])
@@ -519,7 +523,10 @@ export class AuthorBubbles {
             .domain(valueExtent)
             .range([0, 1]);
 
-        const colorInterpolator = d3.interpolateRgb("blue", "purple");
+        const colorScale = d3.scaleLinear()
+            .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
+            .range(GRADIENT)
+            .interpolate(d3.interpolateRgb);
 
         // Node groups with optimized rendering
         const nodeGroups = svg.selectAll(".node")
@@ -532,7 +539,7 @@ export class AuthorBubbles {
         nodeGroups.append("circle")
             .attr("class", "bubble")
             .attr("r", d => d.r)
-            .style("fill", d => colorInterpolator(colorPosition(d.data.value)))
+            .style("fill", d => colorScale(colorPosition(d.data.value)))
             .style("stroke", "rgba(255, 255, 255, 0.8)")
             .style("stroke-width", 1.5)
             .style("cursor", "pointer")

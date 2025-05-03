@@ -1,4 +1,5 @@
-import { getNodes } from './api.js';
+import { getNodes, getClusters } from './api.js';
+import { GRADIENT } from './config.js';
 
 export class GraphVisualizer {
     constructor() {
@@ -31,16 +32,21 @@ export class GraphVisualizer {
 
             const uniqueTerms = Array.from(allTerms);
 
+            const colorScale = d3.scaleLinear()
+                .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
+                .range(GRADIENT)
+                .interpolate(d3.interpolateRgb);
+
             const colorMap = new Map();
             uniqueTerms.forEach((term, index) => {
                 const t = index / (uniqueTerms.length - 1 || 1);
-                colorMap.set(term, d3.interpolateRgb("blue", "purple")(t));
+                colorMap.set(term, colorScale(t));
             });
 
             this.termColors = Object.fromEntries(colorMap);
             console.log(this.termColors);
             const graphData = this.prepareGraphData(rawNodes);
-            this.initializeSimulation(graphData);  // Pass the complete graphData object
+            this.initializeSimulation(graphData);
             this.createLegend();
         } catch (error) {
             console.error("Error loading data:", error);
@@ -78,14 +84,17 @@ export class GraphVisualizer {
                 }
             }
 
-            clusters.push(Array.from(cluster).map(doi =>
-                nodes.find(n => n.doi === doi)));
+            const fullCluster = Array.from(cluster);
+            for (let i = 0; i < fullCluster.length; i += 3) {
+                const chunk = fullCluster.slice(i, i + 3);
+                clusters.push(chunk.map(doi => nodes.find(n => n.doi === doi)));
+            }
         }
 
         // Position clusters in grid
         const gridSize = Math.ceil(Math.sqrt(clusters.length));
-        const cellWidth = 100000 / Math.max(1, gridSize);
-        const cellHeight = 100000 / Math.max(1, gridSize);
+        const cellWidth = 300000 / Math.max(1, gridSize);
+        const cellHeight = 300000 / Math.max(1, gridSize);
 
         const processedNodes = [];
         const allLinks = [];

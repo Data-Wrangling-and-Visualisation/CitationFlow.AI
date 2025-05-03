@@ -21,7 +21,7 @@ async def get_connection():
 async def get_all_articles():
     """Fetch all articles from the database."""
     conn = await get_connection()
-    rows = await conn.fetch("SELECT doi, title, topics, publish_date, url, authors, citations FROM articles LIMIT 2000")
+    rows = await conn.fetch("SELECT doi, title, topics, publish_date, url, authors, citations FROM articles LIMIT 1000")
     await conn.close()
     
     # Return articles as a list of dictionaries
@@ -35,3 +35,25 @@ async def get_all_articles():
         "refs": r["citations"]
 
     } for r in rows]
+
+async def get_clusters():   
+    nodes = get_all_articles()
+
+    used = set()
+    clusters = list()
+    for node in nodes:
+        if node['doi'] in used:
+            continue
+        cluster = dict()
+        cluster['center'] = node
+        cluster['nodes'] = list()
+        for n in node['refs']:
+            cluster['nodes'].append(n)
+            if len(cluster['nodes']) >= 7:
+                break
+        clusters.append(cluster)
+        used.add(node['doi'])
+        for n in cluster['nodes']:
+            used.add(n['doi'])
+
+    return clusters

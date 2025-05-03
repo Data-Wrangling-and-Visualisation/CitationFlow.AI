@@ -19,17 +19,17 @@ services:
       timeout: 2s
       retries: 5
 
-  data_loader:
-    build: ./db
-    container_name: data_loader
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    command: python populate.py
-    volumes:
-      - ./db:/app
+  # data_loader:
+  #   build: ./db
+  #   container_name: data_loader
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   command: python populate.py
+  #   volumes:
+  #     - ./db:/app
 
   backend:
     build: ./back
