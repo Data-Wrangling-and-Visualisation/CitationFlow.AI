@@ -49,8 +49,17 @@ body {
     line-height: 1.6;
 }
 
+svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: relative;
+    z-index: 0;
+    pointer-events: all;
+}
+
 /* ==================== */
-/* Header               */
+/* Header & Navigation  */
 /* ==================== */
 .header {
     display: flex;
@@ -65,18 +74,15 @@ body {
 
 .header-logo {
     height: var(--header-height);
+    transition: transform 0.3s ease;
     position: relative;
     z-index: var(--z-logo);
-    transition: transform 0.3s ease;
 }
 
 .header-logo:hover {
     animation: breathing 1.5s infinite ease-in-out;
 }
 
-/* ==================== */
-/* Navigation           */
-/* ==================== */
 .nav-buttons {
     display: flex;
     gap: var(--spacing-lg);
@@ -120,32 +126,6 @@ body {
 }
 
 /* ==================== */
-/* Animations           */
-/* ==================== */
-@keyframes breathing {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-}
-
-/* ==================== */
-/* Graph Canvas         */
-/* ==================== */
-#graph {
-    position: relative;
-    top: 80px;
-    left: 0;
-    width: 100vw;
-    height: calc(100vh - 80px);
-}
-
-/* ==================== */
 /* Scroll Sections      */
 /* ==================== */
 .scroll-wrapper {
@@ -172,11 +152,42 @@ body {
 }
 
 /* ==================== */
-/* Chart & Table Layout */
+/* Layout Containers    */
 /* ==================== */
+#main-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#side-panel {
+    width: 15%;
+    padding: 5px;
+    background: var(--secondary-bg);
+    color: white;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#graph-container {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#graph {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    pointer-events: all;
+}
+
 #stats-container,
 #year-bar {
     width: 95%;
+    height: 95%;
     max-width: 1700px;
     background: var(--secondary-bg);
     border-radius: var(--radius-md);
@@ -187,13 +198,23 @@ body {
     box-sizing: border-box;
 }
 
-#chart-container,
-#articles-table,
-#year-table {
-    font-size: 8px;
-    padding-right: var(--spacing-md);
-    flex: 1;
-    overflow: hidden;
+#year-bar {
+    max-width: 1000px;
+}
+
+/* ==================== */
+/* Graph Elements       */
+/* ==================== */
+.node {
+    fill: var(--accent-color);
+    stroke: var(--text-color);
+    stroke-width: 10px;
+    cursor: pointer;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
 }
 
 /* ==================== */
@@ -203,8 +224,8 @@ body {
     width: 100%;
     height: 750px;
     background: var(--secondary-bg);
-    border-radius: 12px;
-    margin: 2rem 0;
+    border-radius: var(--radius-md);
+    margin: var(--spacing-md) 0;
     position: relative;
     overflow: hidden;
 }
@@ -213,6 +234,22 @@ body {
 .bubble-label {
     color: white !important;
     fill: white !important;
+}
+
+.bubble {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: saturate(0.9);
+}
+
+.bubble:hover {
+    filter: saturate(1.1) brightness(1.05);
+    transform: scale(1.05);
+}
+
+#chart-container {
+    width: 50%;
+    height: 90%;
+    /* or any suitable value */
 }
 
 .bubble-chart-tooltip {
@@ -235,52 +272,27 @@ body {
     top: 100%;
     left: 50%;
     margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
-}
-
-.bubble {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: saturate(0.9);
-}
-
-.bubble:hover {
-    filter: saturate(1.1) brightness(1.05);
-    transform: scale(1.05);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    #author-bubbles {
-        height: 400px;
-        margin: 1rem 0;
-    }
-
-    .bubble-label {
-        font-size: 10px !important;
-    }
-}
-
-@keyframes bubble-emerge {
-    from {
-        transform: scale(0);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
 }
 
 /* ==================== */
-/* Scrollable Tables    */
+/* Table Styles         */
 /* ==================== */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-sm);
+}
+
 #articles-table,
 #year-table {
-    max-height: 700px;
+    font-size: 8px;
+    padding-right: var(--spacing-md);
+    flex: 1;
     overflow-y: auto;
+    max-height: 600px;
+    max-width: 600px;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -298,15 +310,6 @@ body {
     display: none;
 }
 
-/* ==================== */
-/* Table Styles         */
-/* ==================== */
-.table-wrapper {
-    overflow-x: auto;
-    border-radius: var(--radius-md);
-    margin-top: var(--spacing-sm);
-}
-
 table {
     width: 100%;
     border-collapse: separate;
@@ -321,7 +324,6 @@ th,
 td {
     text-align: center;
     word-wrap: break-word;
-    overflow-wrap: break-word;
     white-space: normal;
 }
 
@@ -383,7 +385,7 @@ tbody tr:last-child td:last-child {
 /* About Section        */
 /* ==================== */
 .about-text {
-    background-color: var(--secondary-bg);
+    background: var(--secondary-bg);
     padding: var(--spacing-sm) 5%;
     border-radius: var(--radius-md);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -412,71 +414,12 @@ tbody tr:last-child td:last-child {
 }
 
 /* ==================== */
-/* Graph Elements       */
+/* Form Controls        */
 /* ==================== */
-.node {
-    fill: var(--accent-color);
-    stroke: var(--text-color);
-    stroke-width: 10px;
-    cursor: pointer;
-}
-
-.link {
-    stroke: #999;
-    stroke-opacity: 0.6;
-}
-
-#main-container {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-}
-
-#side-panel {
-    width: 15%;
-    padding: 5px;
-    background: var(--secondary-bg);
-    color: white;
-    z-index: 2;
-    position: relative;
-    pointer-events: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-}
-
-#graph-container {
-    flex-grow: 1;
-    position: relative;
-    overflow: hidden;
-}
-
-#graph {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    pointer-events: all;
-}
-
-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    position: relative;
-    /* DO NOT use 'absolute' */
-    z-index: 0;
-    pointer-events: all;
-}
-
-#year-bar {
-    max-width: 1000px;
-}
-
 select {
     display: block;
     margin: 0 auto;
-    background-color: var(--secondary-bg);
+    background: var(--secondary-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
@@ -488,7 +431,7 @@ select {
 
 button {
     display: block;
-    margin: 0 auto;
+    margin: 10px auto 0;
     background-color: var(--accent-color);
     color: var(--text-color);
     border: none;
@@ -502,18 +445,56 @@ button {
     font-weight: bold;
     letter-spacing: 1px;
     outline: none;
-    display: inline-block;
+}
 
-    margin-top: 10px;
+button:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+    transform: scale(1.05);
+}
 
-    &:hover {
-        background-color: var(--hover-bg);
-        color: var(--hover-text);
-        transform: scale(1.05);
+button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== */
+/* Animations           */
+/* ==================== */
+@keyframes breathing {
+
+    0%,
+    100% {
+        transform: scale(1);
     }
 
-    &:active {
-        transform: scale(0.95);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+@keyframes bubble-emerge {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ==================== */
+/* Responsive Design    */
+/* ==================== */
+@media (max-width: 768px) {
+    #author-bubbles {
+        height: 400px;
+        margin: var(--spacing-sm) 0;
+    }
+
+    .bubble-label {
+        font-size: 10px !important;
     }
 }

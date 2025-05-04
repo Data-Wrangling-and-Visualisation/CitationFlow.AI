@@ -1,121 +1,106 @@
 import { getNodes } from './api.js';
 import { COLOR_SCHEMES } from './config.js';
 
+// Utility function to create an error message
+function showErrorMessage(message) {
+    console.error(message);
+}
+
+// Nodes Manager class to handle nodes data
 class Nodes {
     constructor() {
         this.nodes = [];
     }
 
-    // Asynchronously load and populate nodes
     async loadNodes() {
         try {
             const basicNodes = await this.fetchNodesData();
-            const nodeDetails = await this.mapNodeDetails(basicNodes);
-            this.nodes = nodeDetails;
+            this.nodes = await this.mapNodeDetails(basicNodes);
         } catch (error) {
-            console.error("Error loading nodes Marsel)))_:", error);
+            showErrorMessage("Error loading nodes: " + error);
         }
     }
 
-    // Fetch basic node data (could be extended or mocked for testing)
     async fetchNodesData() {
         return await getNodes(5000);
     }
 
-    // Map basic node data to full node details
     async mapNodeDetails(basicNodes) {
-        const nodeDetailsPromises = basicNodes.map(async (node) => {
-            return {
-                id: node.doi,
-                title: node.title,
-                authors: node.authors,
-                topics: node.topics,
-                url: node.url,
-                refs: node.refs,
-                date: node.date
-            };
-        });
-
-        return await Promise.all(nodeDetailsPromises);
+        return Promise.all(basicNodes.map(async (node) => ({
+            id: node.doi,
+            title: node.title,
+            authors: node.authors,
+            topics: node.topics,
+            url: node.url,
+            refs: node.refs,
+            date: node.date
+        })));
     }
 
-    // Get all nodes in the storage
     getAllNodes() {
         return this.nodes;
     }
 
-    // Get a specific node by its id
     getNodeById(id) {
         return this.nodes.find(node => node.id === id);
     }
 
-    // Optionally, add or update a node in the storage
     addNode(node) {
         const existingNodeIndex = this.nodes.findIndex(existingNode => existingNode.id === node.id);
         if (existingNodeIndex === -1) {
-            this.nodes.push(node); // Add new node if not already present
+            this.nodes.push(node);
         } else {
-            this.nodes[existingNodeIndex] = node; // Update the node if it already exists
+            this.nodes[existingNodeIndex] = node;
         }
     }
 
-    // Remove a node by its id
     removeNode(id) {
         this.nodes = this.nodes.filter(node => node.id !== id);
     }
 }
 
-
+// Topic plot class
 export class TopicsPlot {
     constructor() {
         this.gradient = d3.scaleLinear()
             .domain(d3.range(0, 1 + 1e-9, 1 / (COLOR_SCHEMES['pastel'].length - 1)))
             .range(COLOR_SCHEMES['pastel'])
             .interpolate(d3.interpolateRgb);
-        this.nodesManager = new Nodes();  // Use the Nodes class
+
+        this.nodesManager = new Nodes();
         this.initContainer();
         this.loadAndRender();
     }
 
-    // Extract all unique topics from the nodes
-    extractAllTerms(nodes) {
-        const termSet = new Set();
-        nodes.forEach(node => {
-            node.topics.forEach(term => termSet.add(term));
-        });
-        return Array.from(termSet).sort(); // Sort terms for consistency
+    initContainer() {
+        this.container = d3.select("#chart-container");
+        this.container.html('');
     }
 
-    // Generate color mapping for each term
+    async loadAndRender() {
+        await this.nodesManager.loadNodes();
+        this.nodes = this.nodesManager.getAllNodes();
+        this.terms = this.extractAllTerms(this.nodes);
+        this.termColors = this.generateTermColors(this.terms);
+        const processedData = this.processNodes(this.nodes);
+        this.createChart(processedData);
+    }
+
+    extractAllTerms(nodes) {
+        const termSet = new Set();
+        nodes.forEach(node => node.topics.forEach(term => termSet.add(term)));
+        return Array.from(termSet).sort();
+    }
+
     generateTermColors(terms) {
         const scale = d3.scaleLinear()
             .domain([0, terms.length - 1])
             .range([0, 1]);
 
-        const colorMap = new Map();
-        terms.forEach((term, i) => {
+        return terms.reduce((colorMap, term, i) => {
             colorMap.set(term, this.gradient(scale(i)));
-        });
-
-        return colorMap;
-    }
-
-    // Initialize the container for rendering
-    initContainer() {
-        this.container = d3.select("#chart-container");
-        this.container.html(''); // Clear any existing content
-    }
-
-    // Load nodes and render the chart
-    async loadAndRender() {
-        await this.nodesManager.loadNodes();  // Load nodes data
-        this.nodes = this.nodesManager.getAllNodes();  // Retrieve the loaded nodes]
-
-        this.terms = this.extractAllTerms(this.nodes);
-        this.termColors = this.generateTermColors(this.terms);
-
-        const processedData = this.processNodes(this.nodes);
-        this.createChart(processedData);
+            return colorMap;
+        }, new Map());
     }
 
     processNodes(nodes) {
@@ -139,8 +124,8 @@ export class TopicsPlot {
     }
 
     createChart(data) {
-        const width = 500;
-        const height = 500;
+        const width = 1000;
+        const height = 1000;
         const radius = Math.min(width, height) / 2;
 
         const svg = this.container.append("svg")
@@ -152,10 +137,7 @@ export class TopicsPlot {
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
         const pie = d3.pie().value(d => d.count).sort(null);
-        const arc = d3.arc()
-            .innerRadius(radius * 0.5)
-            .outerRadius(radius * 0.85)
-            .padAngle(0.02);
+        const arc = d3.arc().innerRadius(radius * 0.5).outerRadius(radius * 0.85).padAngle(0.02);
 
         const arcs = svg.selectAll(".arc")
             .data(pie(data))
@@ -190,16 +172,12 @@ export class TopicsPlot {
             .on("click", (event, d) => this.highlightSlice(d));
     }
 
-    // Highlight a selected pie slice
     highlightSlice(selectedData) {
         const allPaths = this.container.selectAll(".arc path");
-
         allPaths
             .transition()
             .duration(300)
-            .style("opacity", d =>
-                d.data.term === selectedData.data.term ? 1 : 0.2
-            );
+            .style("opacity", d => d.data.term === selectedData.data.term ? 1 : 0.2);
 
         this.selectedTerm = this.selectedTerm === selectedData.data.term ? null : selectedData.data.term;
 
@@ -211,12 +189,10 @@ export class TopicsPlot {
         }
     }
 
-    // Populate the table with articles for the selected term
     populateTable(term) {
         const articles = this.nodes.filter(node => node.topics.includes(term));
         const tableContainer = d3.select("#articles-table");
-        tableContainer.html('');  // Clear existing table content
-
+        tableContainer.html('');
         const table = tableContainer.append("table")
             .style("width", "100%")
             .style("border-collapse", "collapse")
@@ -237,12 +213,10 @@ export class TopicsPlot {
         });
     }
 
-    // Clear the articles table
     clearTable() {
         d3.select("#articles-table").html('');
     }
 
-    // Show the tooltip with topic details
     showTooltip(event, data) {
         this.hideTooltip();
 
