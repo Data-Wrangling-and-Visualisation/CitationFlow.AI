@@ -251,13 +251,15 @@ export class GraphVisualizer {
     showArticleInfo(d) {
         const infoPanel = document.getElementById("article-info");
         const dateOnly = d.date.split("T")[0]; // Extract only the date part
+        const truncateText = (text, maxLength) => text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+
         infoPanel.innerHTML = `
-            <h3>${d.title}</h3>
-            <p> ${d.authors.join(", ")}</p>
+            <h3>${truncateText(d.title, 100)}</h3>
+            <p>${truncateText(d.authors.join(", "), 70)}</p>
             <p>${dateOnly}</p>
             <p><a href="https://doi.org/${d.doi}" target="_blank"><img src="../static/DOI_logo.svg" alt="DOI" style="height:64px;vertical-align:middle;"></a>
             <a href="https://sci-hub.se/${d.doi}" target="_blank"><img src="../static/pdf_logo.svg" alt="PDF" style="height:64px;vertical-align:middle;"></a></p>
-            <div>${d.topics.map(t => `<span style="background:${this.termColors[t]};padding:2px 6px;border-radius:10px;margin-right:4px;">${t}</span>`).join('')}</div>
+            <div>${d.topics.map(t => `<span style="background:${this.termColors[t]};padding:2px 6px;border-radius:10px;margin-right:4px;">${truncateText(t, 30)}</span>`).join('')}</div>
         `;
     }
 
