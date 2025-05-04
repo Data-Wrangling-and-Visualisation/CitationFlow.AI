@@ -161,7 +161,7 @@ svg {
 }
 
 #side-panel {
-    width: 15%;
+    width: 20%;
     padding: 5px;
     background: var(--secondary-bg);
     color: white;
@@ -200,6 +200,14 @@ svg {
 
 #year-bar {
     max-width: 1000px;
+}
+
+#article-info {
+    font-size: medium;
+    margin-top: 50px;
+    background-color: var(--tertiary-bg);
+    border-radius: var(--radius-md);
+    text-align: center;
 }
 
 /* ==================== */
