@@ -156,6 +156,16 @@ export class GraphVisualizer {
                     centerX = Math.cos(i * step) * ring * 7000 + 500;
                     centerY = Math.sin(i * step) * ring * 7000 + 500;
                     break;
+                case "FUN":
+                    centerX = Math.random() * 50000;
+                    centerY = Math.random() * 50000;
+                    break;
+                case "DISK":
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = Math.sqrt(Math.random()) * 15000;
+                    centerX = Math.cos(angle) * radius;
+                    centerY = Math.sin(angle) * radius;
+                    break;
             }
 
             cluster.forEach(node => {
@@ -214,7 +224,7 @@ export class GraphVisualizer {
             .data(links).enter().append("line")
             .attr("class", "link")
             .attr("stroke", "#aaa")
-            .attr("stroke-width", 4);
+            .attr("stroke-width", 10);
 
         const node = this.svgGroup.selectAll(".node")
             .data(nodes, d => d.doi).enter().append("circle")
