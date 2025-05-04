@@ -11,9 +11,8 @@ dotenv.load_dotenv()
 app = FastAPI()
 
 origins = [
-    "http://" + os.getenv("HOST_NAME"),
-    "http://" + os.getenv("HOST_NAME") + ":80",
-    "http://" + os.getenv("HOST_NAME") + ":8000",
+    os.getenv("HOST_NAME"),
+    os.getenv("HOST_NAME") + ":" + os.getenv("FRONT_PORT"),
 ]
 
 app.add_middleware(
@@ -25,9 +24,9 @@ app.add_middleware(
 )
 
 @app.get("/nodes")
-async def get_nodes():
+async def get_nodes(node_num: int = 3280):
     try:
-        articles = await get_all_articles()
+        articles = await get_all_articles(node_num)
         return articles
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching articles")

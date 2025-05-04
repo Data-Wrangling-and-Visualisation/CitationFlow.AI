@@ -18,10 +18,10 @@ async def get_connection():
     """Establish a connection to the PostgreSQL database."""
     return await asyncpg.connect(**DB_CONFIG)
 
-async def get_all_articles():
+async def get_all_articles(node_num: int = 3280):
     """Fetch all articles from the database."""
     conn = await get_connection()
-    rows = await conn.fetch("SELECT doi, title, topics, publish_date, url, authors, citations FROM articles LIMIT 3280")
+    rows = await conn.fetch(f"SELECT doi, title, topics, publish_date, url, authors, citations FROM articles LIMIT {node_num}")
     await conn.close()
     
     # Return articles as a list of dictionaries

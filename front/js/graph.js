@@ -1,5 +1,5 @@
 import { getNodes } from './api.js';
-import { GRADIENT } from './config.js';
+import { COLOR_SCHEMES } from './config.js';
 
 export class GraphVisualizer {
     constructor() {
@@ -8,24 +8,44 @@ export class GraphVisualizer {
     }
 
     config() {
+        this.node_num = 3280;
         this.topology = "RING";
+        this.colorScheme = "pastel";
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.activeFilters = new Set();
 
         const topologySelect = document.getElementById("topology-select");
         const applyButton = document.getElementById("apply-button");
+        const nodesSlider = document.getElementById("nodes-slider");
+        const nodesCountLabel = document.getElementById("nodes-count");
+        const colorSchemeSelect = document.getElementById("color-scheme-select");
 
         topologySelect.value = this.topology;
+        colorSchemeSelect.value = this.colorScheme;
+
         topologySelect.addEventListener("change", e => {
             this.topology = e.target.value;
         });
 
+        colorSchemeSelect.addEventListener("change", e => {
+            this.colorScheme = e.target.value;
+        });
+
+        nodesSlider.value = this.node_num;
+        nodesCountLabel.textContent = this.node_num;
+
+        nodesSlider.addEventListener("input", e => {
+            this.node_num = parseInt(e.target.value);
+            nodesCountLabel.textContent = this.node_num;
+        });
+
         applyButton.addEventListener("click", () => {
-            console.log("Applying topology:", this.topology);
+            console.log("Applying topology:", this.topology, "with nodes:", this.node_num, "and scheme:", this.colorScheme);
             this.reloadSimulation();
         });
     }
+
 
     init() {
         this.createTooltip();
@@ -47,7 +67,7 @@ export class GraphVisualizer {
 
     async loadAndVisualizeData() {
         try {
-            const rawNodes = await getNodes();
+            const rawNodes = await getNodes(this.node_num);
 
             const allTerms = new Set();
             rawNodes.forEach(node => {
@@ -58,8 +78,8 @@ export class GraphVisualizer {
 
             const uniqueTerms = Array.from(allTerms);
             const colorScale = d3.scaleLinear()
-                .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
-                .range(GRADIENT)
+                .domain(d3.range(0, 1 + 1e-9, 1 / (COLOR_SCHEMES[this.colorScheme].length - 1)))
+                .range(COLOR_SCHEMES[this.colorScheme])
                 .interpolate(d3.interpolateRgb);
 
             const colorMap = new Map();
@@ -112,8 +132,8 @@ export class GraphVisualizer {
 
         const filteredClusters = clusters.filter(c => c.length > 2);
         const gridSize = Math.ceil(Math.sqrt(filteredClusters.length));
-        const cellWidth = 50000 / gridSize;
-        const cellHeight = 50000 / gridSize;
+        const cellWidth = 40000 / gridSize;
+        const cellHeight = 40000 / gridSize;
 
         const processedNodes = [];
         const allLinks = [];

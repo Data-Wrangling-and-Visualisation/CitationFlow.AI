@@ -1,5 +1,5 @@
 import { getNodes } from './api.js';
-import { GRADIENT } from './config.js';
+import { COLOR_SCHEMES } from './config.js';
 
 class Nodes {
     constructor() {
@@ -19,7 +19,7 @@ class Nodes {
 
     // Fetch basic node data (could be extended or mocked for testing)
     async fetchNodesData() {
-        return await getNodes();
+        return await getNodes(5000);
     }
 
     // Map basic node data to full node details
@@ -69,8 +69,8 @@ class Nodes {
 export class TopicsPlot {
     constructor() {
         this.gradient = d3.scaleLinear()
-            .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
-            .range(GRADIENT)
+            .domain(d3.range(0, 1 + 1e-9, 1 / (COLOR_SCHEMES['pastel'].length - 1)))
+            .range(COLOR_SCHEMES['pastel'])
             .interpolate(d3.interpolateRgb);
         this.nodesManager = new Nodes();  // Use the Nodes class
         this.initContainer();
@@ -330,7 +330,7 @@ export class DatePlot {
             .domain(yearExtent)
             .range([0, 1]);
 
-        const colorScale = d => d3.interpolateRgb(GRADIENT[0], GRADIENT[4])(colorPosition(d.year));
+        const colorScale = d => d3.interpolateRgb(COLOR_SCHEMES['pastel'][0], COLOR_SCHEMES['pastel'][4])(colorPosition(d.year));
 
         const x = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.count)])
@@ -524,8 +524,8 @@ export class AuthorBubbles {
             .range([0, 1]);
 
         const colorScale = d3.scaleLinear()
-            .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
-            .range(GRADIENT)
+            .domain(d3.range(0, 1 + 1e-9, 1 / (COLOR_SCHEMES['pastel'].length - 1)))
+            .range(COLOR_SCHEMES['pastel'])
             .interpolate(d3.interpolateRgb);
 
         // Node groups with optimized rendering

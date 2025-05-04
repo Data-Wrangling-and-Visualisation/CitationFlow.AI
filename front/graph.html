@@ -21,10 +21,26 @@
     </header>
     <div id="main-container">
         <div id="side-panel">
+            <label for="color-scheme-select">Graph Topology</label>
             <select id="topology-select">
                 <option value="RING">Ring</option>
                 <option value="GRID">Grid</option>
             </select>
+            <div>
+                <label for="nodes-slider">Number of Nodes: <br>
+                    <center><span id="nodes-count">3280</span></center>
+                </label>
+                <input type="range" id="nodes-slider" min="1000" max="5000" step="500" value="3280">
+            </div>
+            <div>
+                <label for="color-scheme-select">Color Scheme:</label>
+                <select id="color-scheme-select">
+                    <option value="pastel">Pastel</option>
+                    <option value="blues">Blues</option>
+                    <option value="plasma">Plasma</option>
+                    <option value="greens">Greens</option>
+                </select>
+            </div>
             <button id="apply-button">Apply</button>
         </div>
         <div id="graph-container">
