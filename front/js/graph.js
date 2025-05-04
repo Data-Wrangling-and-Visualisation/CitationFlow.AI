@@ -8,15 +8,41 @@ export class GraphVisualizer {
     }
 
     config() {
+        this.topology = "RING";
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.activeFilters = new Set();
+
+        const topologySelect = document.getElementById("topology-select");
+        const applyButton = document.getElementById("apply-button");
+
+        topologySelect.value = this.topology;
+        topologySelect.addEventListener("change", e => {
+            this.topology = e.target.value;
+        });
+
+        applyButton.addEventListener("click", () => {
+            console.log("Applying topology:", this.topology);
+            this.reloadSimulation();
+        });
     }
 
     init() {
         this.createTooltip();
         this.initSVG();
         this.loadAndVisualizeData();
+    }
+
+    reloadSimulation() {
+        if (this.simulation) {
+            this.simulation.stop();
+        }
+
+        d3.select("#graph").select("svg").remove();
+        this.tooltip?.remove();
+        this.legend?.remove();
+
+        this.init();  // Properly reinitialize
     }
 
     async loadAndVisualizeData() {
@@ -31,20 +57,18 @@ export class GraphVisualizer {
             });
 
             const uniqueTerms = Array.from(allTerms);
-
             const colorScale = d3.scaleLinear()
                 .domain(d3.range(0, 1 + 1e-9, 1 / (GRADIENT.length - 1)))
                 .range(GRADIENT)
                 .interpolate(d3.interpolateRgb);
 
             const colorMap = new Map();
-            uniqueTerms.forEach((term, index) => {
-                const t = index / (uniqueTerms.length - 1 || 1);
+            uniqueTerms.forEach((term, i) => {
+                const t = i / (uniqueTerms.length - 1 || 1);
                 colorMap.set(term, colorScale(t));
             });
 
             this.termColors = Object.fromEntries(colorMap);
-            console.log(this.termColors);
             const graphData = this.prepareGraphData(rawNodes);
             this.initializeSimulation(graphData);
             this.createLegend();
@@ -56,14 +80,10 @@ export class GraphVisualizer {
     prepareGraphData(nodes) {
         const visited = new Set();
         const clusters = [];
-
-        // Preprocess refs for fast lookup
         const nodeRefsMap = new Map();
-        nodes.forEach(node => {
-            nodeRefsMap.set(node.doi, new Set(node.refs || []));
-        });
 
-        // First pass: identify all clusters based on references
+        nodes.forEach(n => nodeRefsMap.set(n.doi, new Set(n.refs || [])));
+
         for (const node of nodes) {
             if (visited.has(node.doi)) continue;
 
@@ -71,25 +91,18 @@ export class GraphVisualizer {
             const queue = [node.doi];
             visited.add(node.doi);
 
-            // BFS to find connected components (based on references)
             while (queue.length > 0) {
-                const currentDOI = queue.shift();
-
-                // Find all nodes that reference or are referenced by current node
-                for (const otherNode of nodes) {
-                    if (visited.has(otherNode.doi)) continue;
-
-                    // Check if nodes are connected in either direction using preprocessed refs
-                    if (nodeRefsMap.get(otherNode.doi).has(currentDOI) ||
-                        nodeRefsMap.get(currentDOI).has(otherNode.doi)) {
-                        cluster.add(otherNode.doi);
-                        visited.add(otherNode.doi);
-                        queue.push(otherNode.doi);
+                const current = queue.shift();
+                for (const other of nodes) {
+                    if (visited.has(other.doi)) continue;
+                    if (nodeRefsMap.get(other.doi).has(current) || nodeRefsMap.get(current).has(other.doi)) {
+                        cluster.add(other.doi);
+                        visited.add(other.doi);
+                        queue.push(other.doi);
                     }
                 }
             }
 
-            // Convert the cluster set to an array and chunk it (limit cluster size to 10)
             const fullCluster = Array.from(cluster);
             for (let i = 0; i < fullCluster.length; i += 10) {
                 const chunk = fullCluster.slice(i, i + 10);
@@ -97,139 +110,107 @@ export class GraphVisualizer {
             }
         }
 
-        // Position clusters in grid (dynamically adjust based on the number of clusters)
-        const gridSize = Math.ceil(18);
-        const cellWidth = Math.max(1, 50000 / gridSize);
-        const cellHeight = Math.max(1, 50000 / gridSize);
+        const filteredClusters = clusters.filter(c => c.length > 2);
+        const gridSize = Math.ceil(Math.sqrt(filteredClusters.length));
+        const cellWidth = 50000 / gridSize;
+        const cellHeight = 50000 / gridSize;
 
         const processedNodes = [];
         const allLinks = [];
         const nodeMap = new Map();
 
-        // Filter out clusters with only one node
-        const filteredClusters = clusters.filter(cluster => cluster.length > 1);
+        filteredClusters.forEach((cluster, i) => {
+            let centerX, centerY;
 
-        filteredClusters.forEach((cluster, clusterIndex) => {
-            const row = Math.floor(clusterIndex / gridSize);
-            const col = clusterIndex % gridSize;
-            const centerX = col * cellWidth + cellWidth / 2 - 25000;
-            const centerY = row * cellHeight + cellHeight / 2 - 25000;
+            switch (this.topology) {
+                case "GRID":
+                    const row = Math.floor(i / gridSize);
+                    const col = i % gridSize;
+                    centerX = col * cellWidth + cellWidth / 2 - 25000;
+                    centerY = row * cellHeight + cellHeight / 2 - 25000;
+                    break;
+                case "RING":
+                    const ring = Math.floor(Math.log2(i / 4 + 1));
+                    const step = 2 * Math.PI / (Math.pow(2, ring + 2));
 
-            cluster.forEach((node) => {
-                const nodeObj = {
+                    centerX = Math.cos(i * step) * ring * 7000 + 500;
+                    centerY = Math.sin(i * step) * ring * 7000 + 500;
+                    break;
+            }
+
+            cluster.forEach(node => {
+                const n = {
                     ...node,
-                    color: this.termColors[node.topics?.[0]] || "#ccc", // Default color if undefined
+                    color: this.termColors[node.topics?.[0]] || "#ccc",
                     x: centerX,
                     y: centerY,
-                    cluster: clusterIndex
+                    cluster: i
                 };
-
-                processedNodes.push(nodeObj);
-                nodeMap.set(node.doi, nodeObj);
+                processedNodes.push(n);
+                nodeMap.set(node.doi, n);
             });
         });
 
-        // Process links based on references and ensure they're within the same cluster
-        nodes.forEach(source => {
-            const sourceCluster = nodeMap.get(source.doi)?.cluster;
-
-            (source.refs || []).forEach(targetDOI => {
-                const targetNode = nodeMap.get(targetDOI);
-
-                // Only create a link if the source and target belong to the same cluster
-                if (targetNode) {
-                    const targetCluster = targetNode.cluster;
-                    if (sourceCluster === targetCluster) {
-                        // Create link if they are in the same cluster and referencing each other
-                        allLinks.push({
-                            source: source.doi,
-                            target: targetDOI
-                        });
-                    }
-                }
-            });
-        });
-
-        // Ensure we also create intra-cluster links by checking references between nodes
         filteredClusters.forEach(cluster => {
-            // Create links between nodes that reference each other within the same cluster
-            cluster.forEach((node) => {
-                const sourceDOI = node.doi;
-                const nodeRefs = nodeRefsMap.get(sourceDOI) || [];
-                nodeRefs.forEach(refDOI => {
-                    // Check if the reference node is in the same cluster
-                    const targetNode = nodeMap.get(refDOI);
-                    if (targetNode && targetNode.cluster === node.cluster) {
-                        allLinks.push({
-                            source: sourceDOI,
-                            target: refDOI
-                        });
+            cluster.forEach(node => {
+                const refs = nodeRefsMap.get(node.doi) || [];
+                refs.forEach(ref => {
+                    const target = nodeMap.get(ref);
+                    if (target && target.cluster === node.cluster) {
+                        allLinks.push({ source: node.doi, target: ref });
                     }
                 });
             });
 
-            // Add fallback link for disjoint nodes in a cluster
             if (cluster.length > 1) {
-                const firstNode = cluster[0];
-                cluster.forEach((node, index) => {
-                    if (node.doi !== firstNode.doi) {
-                        // Link any disjoint node to the first node in the cluster
-                        allLinks.push({
-                            source: node.doi,
-                            target: firstNode.doi
-                        });
+                const first = cluster[0];
+                cluster.forEach(n => {
+                    if (n.doi !== first.doi) {
+                        allLinks.push({ source: n.doi, target: first.doi });
                     }
                 });
             }
         });
 
-        return {
-            nodes: processedNodes,
-            links: allLinks,
-            grid: {
-                size: gridSize,
-                cellWidth,
-                cellHeight
-            }
-        };
+        return { nodes: processedNodes, links: allLinks };
     }
-
 
     initSVG() {
         this.svg = d3.select("#graph").append("svg")
-            .attr("width", this.width).attr("height", this.height)
-            .call(d3.zoom().on("zoom", e => this.svgGroup.attr("transform", e.transform)));
+            .attr("width", this.width)
+            .attr("height", this.height);
 
         this.svgGroup = this.svg.append("g");
+
+        this.svg.call(d3.zoom().on("zoom", e => {
+            this.svgGroup.attr("transform", e.transform);
+        }));
     }
 
     initializeSimulation(graphData) {
-        const { nodes, links, grid } = graphData;
-        const { size: gridSize, cellWidth, cellHeight } = grid;
+        const { nodes, links } = graphData;
 
         const link = this.svgGroup.selectAll(".link")
             .data(links).enter().append("line")
             .attr("class", "link")
+            .attr("stroke", "#aaa")
             .attr("stroke-width", 4);
 
         const node = this.svgGroup.selectAll(".node")
             .data(nodes, d => d.doi).enter().append("circle")
-            .attr("class", "node").attr("r", 100).style("fill", d => d.color)
-            .attr("stroke", "#fff").attr("stroke-width", 1.5)
+            .attr("class", "node")
+            .attr("r", 100)
+            .style("fill", d => d.color)
             .on("mouseover", (e, d) => this.showTooltip(e, d))
-            .on("mouseout", () => this.hideTooltip())
+            .on("mouseout", (e, d) => this.hideTooltip(e, d))
             .on("click", (_, d) => window.open(d.url, '_blank'))
             .call(d3.drag()
                 .on("start", (e, d) => this.dragstarted(e, d))
                 .on("drag", (e, d) => this.dragged(e, d))
-                .on("end", (e, d) => this.dragended(e, d))
-            );
+                .on("end", (e, d) => this.dragended(e, d)));
 
         this.simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links)
-                .id(d => d.doi)
-                .distance(200)
-                .strength(0.5))
+            .force("link", d3.forceLink(links).id(d => d.doi).distance(200).strength(0.5))
             .force("x", d3.forceX(d => d.x).strength(0.5))
             .force("y", d3.forceY(d => d.y).strength(0.5))
             .force("collision", d3.forceCollide(200).strength(1))
@@ -247,6 +228,18 @@ export class GraphVisualizer {
         node
             .attr("cx", d => d.x)
             .attr("cy", d => d.y);
+    }
+
+    createTooltip() {
+        this.tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0)
+            .style("position", "absolute")
+            .style("background", "#333")
+            .style("color", "white")
+            .style("padding", "10px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none");
     }
 
 
@@ -270,13 +263,14 @@ export class GraphVisualizer {
         `).style("left", `${event.pageX + 10}px`).style("top", `${event.pageY + 10}px`);
     }
 
-    hideTooltip() {
+    hideTooltip(event, d) {
         d3.select(event.target)
             .transition()
             .duration(200)
             .attr("r", 100);
         this.tooltip.style("opacity", 0);
     }
+
 
     createLegend() {
         this.legend = d3.select("body").append("div").attr("class", "legend")
@@ -325,16 +319,6 @@ export class GraphVisualizer {
             );
     }
 
-    createTooltip() {
-        this.tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip").style("opacity", 0);
-    }
-
-    destroy() {
-        this.svg?.remove();
-        this.tooltip?.remove();
-        this.legend?.remove();
-    }
     dragstarted(event, d) {
         if (!event.active) this.simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
@@ -350,6 +334,12 @@ export class GraphVisualizer {
         if (!event.active) this.simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
+    }
+
+    destroy() {
+        this.svg?.remove();
+        this.tooltip?.remove();
+        this.legend?.remove();
     }
 }
 

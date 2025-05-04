@@ -19,9 +19,19 @@
             <a href="./about.html">About</a>
         </div>
     </header>
-    <div id="graph-container">
-        <div id="graph"></div>
+    <div id="main-container">
+        <div id="side-panel">
+            <select id="topology-select">
+                <option value="RING">Ring</option>
+                <option value="GRID">Grid</option>
+            </select>
+            <button id="apply-button">Apply</button>
+        </div>
+        <div id="graph-container">
+            <div id="graph"></div>
+        </div>
     </div>
+
 
     <script type="module" src="js/graph.js"></script>
 </body>
